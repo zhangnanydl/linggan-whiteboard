@@ -1,0 +1,70 @@
+{
+  "name": "linggan-whiteboard",
+  "version": "1.5.0",
+  "description": "适合课堂教学的桌面白板应用",
+  "author": "Linggan Whiteboard",
+  "license": "MIT",
+  "keywords": [
+    "whiteboard",
+    "teaching",
+    "electron",
+    "react",
+    "drawing"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "desktop": "npm run build && electron .",
+    "package:win": "npm run build && electron-builder --win nsis portable --x64"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "40.9.3",
+    "electron-builder": "26.15.3",
+    "vite": "^7.1.2"
+  },
+  "build": {
+    "appId": "com.linggan.whiteboard",
+    "productName": "灵感白板",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "artifactName": "灵感白板-${version}-${arch}-setup.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "灵感白板",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "language": "2052"
+    },
+    "portable": {
+      "artifactName": "灵感白板-${version}-${arch}-portable.${ext}"
+    }
+  }
+}

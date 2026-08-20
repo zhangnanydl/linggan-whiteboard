@@ -1,0 +1,24 @@
+name: 功能建议
+description: 分享教学场景和产品改进建议
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 使用场景
+      description: 请先描述教学或演示过程中遇到的问题。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 你希望灵感白板如何帮助解决这个问题？
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 其他方案
+      description: 是否尝试过其他工具或替代操作？
