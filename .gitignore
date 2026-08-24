@@ -2,9 +2,8 @@
 /node_modules/
 /dist/
 
-# Electron Builder output: keep only distributable executables
-/release/*
-!/release/*.exe
+# Electron Builder output is published through GitHub Releases, never committed
+/release/
 
 # Temporary packaging directories
 /desktop-app-stage/

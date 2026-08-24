@@ -6,9 +6,9 @@
 
 自由书写、绘制图形、添加便签，并让每一块画板都被自动记住。
 
-[下载安装版](./release/灵感白板-1.6.0-x64-setup.exe) · [下载便携版](./release/灵感白板-1.6.0-x64-portable.exe) · [报告问题](../../issues) · [参与贡献](./CONTRIBUTING.md)
+[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/灵感白板-1.7.0-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/灵感白板-1.7.0-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
 
-![Version](https://img.shields.io/badge/version-1.6.0-6C5CE7?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.7.0-6C5CE7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![License](https://img.shields.io/badge/license-MIT-22A06B?style=flat-square)
 ![Offline](https://img.shields.io/badge/data-local--only-F59E0B?style=flat-square)
@@ -30,13 +30,14 @@
 | 🗂️ 记忆画板 | 创建、搜索、切换、重命名和删除多个画板，每块画板独立保存 |
 | 🖥️ 无限画布 | 工作区铺满窗口，可向任意方向拖动漫游，画板库可收起并记住状态 |
 | 📌 智能工具箱 | 图钉固定后始终显示；未固定时点击画布立即隐藏，悬停立即唤回 |
+| 🖱️ 滚轮切换 | 在画布上滚动鼠标滚轮切换工具，默认轮询全部，也可自定义 3–5 个常用工具 |
 | ✍️ 自由书写 | 画笔、荧光笔、粗细和多种颜色，适合鼠标与触控书写 |
 | 📐 图形工具 | 直线、自由箭头、矩形和圆形，快速完成课堂示意图 |
 | 🔗 智能连线 | 点击两个图形自动生成正交折线，移动节点时重新规划，并支持流动动画 |
-| 📝 文本与便签 | 使用应用内编辑窗口输入文字，为便签选择颜色并实时预览 |
+| 📝 原位文本 | 点击画布直接输入；矩形和圆形内可直接输入并自动居中、换行与缩放 |
 | 🎨 贴纸 | 在画布中加入表情贴纸，让重点更加醒目 |
 | ↩️ 历史操作 | 支持撤销、重做以及删除当前选中的元素 |
-| 🧽 连续擦除 | 橡皮擦可按住拖动连续清理内容，整次拖动支持一步撤销 |
+| 🧽 局部擦除 | 自由笔迹只擦掉经过的局部，橡皮范围可放大缩小，整次拖动支持一步撤销 |
 | 🔍 画布控制 | 40%–250% 缩放、回到原点和空白处拖动画布 |
 | 🖼️ PNG 导出 | 将当前画板导出为以画板名称命名的 PNG 图片 |
 | 🔒 本地优先 | 内容自动保存在当前设备浏览器存储中，不依赖云服务 |
@@ -45,11 +46,11 @@
 
 ### Windows 安装版
 
-下载 [灵感白板-1.6.0-x64-setup.exe](./release/灵感白板-1.6.0-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
+从 [GitHub Releases 下载灵感白板-1.7.0 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/灵感白板-1.7.0-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
 
 ### Windows 便携版
 
-下载 [灵感白板-1.6.0-x64-portable.exe](./release/灵感白板-1.6.0-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
+从 [GitHub Releases 下载灵感白板-1.7.0 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/灵感白板-1.7.0-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
 
 > 当前发行文件尚未购买代码签名证书。Windows 首次运行时可能显示 SmartScreen 提示，请核对文件来源后选择“更多信息 → 仍要运行”。
 
@@ -67,7 +68,11 @@
 | --- | --- |
 | 选择元素 | 选择“选择”工具后点击元素 |
 | 拖动画布 | 选择工具下拖动空白处，或按住空格键/鼠标中键拖动 |
-| 编辑文字或便签 | 双击画布中的文字或便签 |
+| 输入画布文字 | 选择“文本”后点击空白处，直接输入，`Ctrl + Enter` 完成 |
+| 输入图形文字 | 选择“文本”后点击矩形或圆形，文字自动居中排版 |
+| 再次编辑 | 使用“选择”双击文字、矩形、圆形或便签 |
+| 调节橡皮 | 选择“橡皮擦”后用工具箱的减号、加号调节擦除范围 |
+| 滚轮切换工具 | 鼠标位于画布时，向下滚动切换下一个工具，向上滚动返回上一个 |
 | 创建智能连线 | 选择“智能连线”，依次点击起点图形和终点图形 |
 | 切换流动效果 | 选中智能连线后点击工具箱中的“流动”按钮 |
 | 删除元素 | 选中元素后按 `Delete` 或 `Backspace` |
@@ -94,6 +99,18 @@
 隐藏后，画布上方不再被工具箱遮挡，适合连续书写和课堂展示。
 
 ![工具箱隐藏后的沉浸画布](./docs/images/toolbar-hidden.png)
+
+## 原位文字与图形排版
+
+选择“文本”后，无论点击画布空白处还是矩形、圆形，都可以在当前位置直接输入，不再弹出文字窗口。图形内文字会根据可用空间自动居中、换行并缩放；使用选择工具双击即可再次编辑。
+
+![矩形内直接输入并自动排版](./docs/images/inline-shape-text.png)
+
+## 滚轮工具轮询
+
+鼠标位于画布时滚动滚轮即可快速切换工具。默认按工具栏顺序轮询全部 12 个工具；在“设置 → 工具切换设置”中切换为自定义模式后，可固定选择 3–5 个常用工具。配置自动保存在本机。
+
+![自定义 3–5 个滚轮轮询工具](./docs/images/tool-cycle-settings.png)
 
 ## 便签编辑器
 
@@ -178,7 +195,7 @@ whiteboard/
 ├─ docs/images/          # README 实际运行截图
 ├─ design/               # 产品设计概念稿
 ├─ electron/main.cjs     # Electron 主进程与安全配置
-├─ release/              # 已发布的 Windows EXE
+├─ release/              # 本地打包输出（已忽略；EXE 发布到 GitHub Releases）
 ├─ src/main.jsx          # 白板功能、画板存储和交互
 ├─ src/styles.css        # 产品界面样式
 ├─ index.html            # Vite 入口页面

@@ -69,3 +69,27 @@
 
 /* Continuous eraser */
 .board.tool-eraser{cursor:cell}
+
+/* Inline canvas and shape text */
+.shape-label{pointer-events:none;user-select:none}
+.inline-text-editor{position:absolute;z-index:16;padding:7px;border:2px solid #1769e0;border-radius:9px;background:rgba(255,255,255,.94);box-shadow:0 7px 22px rgba(23,105,224,.18)}
+.inline-text-editor textarea{width:100%;height:100%;padding:5px 7px;border:0;outline:0;resize:none;overflow:hidden;background:transparent;color:var(--inline-color);font-size:var(--inline-font-size);font-weight:600;line-height:1.28}
+.inline-text-editor.inside-shape textarea{text-align:center}
+.inline-text-editor.free-text{border-width:0 0 2px;border-radius:4px;box-shadow:none;background:rgba(255,255,255,.78)}
+.inline-text-editor small{position:absolute;left:50%;bottom:-25px;transform:translateX(-50%);padding:3px 8px;border-radius:6px;background:#1d2734;color:#fff;font-size:11px;white-space:nowrap;pointer-events:none}
+
+/* Partial eraser */
+.eraser-preview{fill:rgba(255,255,255,.7);stroke:#2764cf;stroke-width:1.5;stroke-dasharray:4 3;pointer-events:none}
+.eraser-size-label{min-width:58px;color:#516071;font-size:12px;font-weight:700;text-align:center}
+
+/* Wheel tool cycle settings */
+.settings-dialog{width:min(650px,calc(100vw - 40px))}
+.settings-dialog .dialog-head{align-items:flex-start}.settings-dialog .dialog-head h2{margin-bottom:6px}.settings-dialog .dialog-head p{margin:0;color:#75808c;font-size:13px}
+.cycle-mode{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cycle-mode>button{padding:15px 16px;border:1px solid #dce2e9;border-radius:11px;background:#fff;text-align:left;display:flex;flex-direction:column;gap:5px;cursor:pointer}.cycle-mode>button.selected{border-color:#1769e0;background:#f4f8ff;box-shadow:0 0 0 2px rgba(23,105,224,.08)}.cycle-mode strong{font-size:14px}.cycle-mode small{color:#75808c;font-size:12px}
+.cycle-tools{margin-top:18px}.cycle-tools-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px}.cycle-tools-head span{color:#1769e0;font-weight:800}.cycle-tool-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.cycle-tool-grid button{height:43px;padding:0 10px;border:1px solid #dfe4ea;border-radius:9px;background:#fff;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;cursor:pointer}.cycle-tool-grid button.selected{border-color:#83a9eb;background:#edf4ff;color:#1459d9}.cycle-tool-grid button svg:last-child{margin-left:auto}.settings-hint{display:block;margin-top:11px;color:#7b8590;font-size:11px}
+.all-tools-note{min-height:82px;margin-top:18px;padding:15px 17px;border:1px solid #e1e6ec;border-radius:11px;background:#f8fafc;color:#1769e0;display:flex;align-items:center;gap:13px}.all-tools-note>span{display:flex;flex-direction:column;gap:5px}.all-tools-note strong{color:#35404c;font-size:14px}.all-tools-note small{color:#7b8590;font-size:12px}
+
+/* Refined compact header typography */
+.topbar{padding:0 24px}.identity{gap:10px}.identity>strong{font-size:18px;letter-spacing:-.35px}.logo{width:36px;height:36px;border-radius:10px}
+.library-toggle,.board-title-button{height:39px;font-size:13px;font-weight:650}.board-title-button{min-width:160px;max-width:230px;padding:0 12px;font-size:14px}.save-status{font-size:12px}
+.actions{gap:8px}.actions button{height:39px;padding:0 13px;font-size:13px;font-weight:650}.actions .primary{padding:0 16px}
