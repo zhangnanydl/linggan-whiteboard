@@ -6,9 +6,9 @@
 
 自由书写、绘制图形、添加便签，并让每一块画板都被自动记住。
 
-[下载安装版](./release/灵感白板-1.5.0-x64-setup.exe) · [下载便携版](./release/灵感白板-1.5.0-x64-portable.exe) · [报告问题](../../issues) · [参与贡献](./CONTRIBUTING.md)
+[下载安装版](./release/灵感白板-1.5.1-x64-setup.exe) · [下载便携版](./release/灵感白板-1.5.1-x64-portable.exe) · [报告问题](../../issues) · [参与贡献](./CONTRIBUTING.md)
 
-![Version](https://img.shields.io/badge/version-1.5.0-6C5CE7?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.5.1-6C5CE7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![License](https://img.shields.io/badge/license-MIT-22A06B?style=flat-square)
 ![Offline](https://img.shields.io/badge/data-local--only-F59E0B?style=flat-square)
@@ -35,7 +35,7 @@
 | 📝 文本与便签 | 使用应用内编辑窗口输入文字，为便签选择颜色并实时预览 |
 | 🎨 贴纸 | 在画布中加入表情贴纸，让重点更加醒目 |
 | ↩️ 历史操作 | 支持撤销、重做以及删除当前选中的元素 |
-| 🔍 画布控制 | 60%–150% 缩放、适应画布和沉浸式演示模式 |
+| 🔍 画布控制 | 40%–250% 缩放、回到原点和空白处拖动画布 |
 | 🖼️ PNG 导出 | 将当前画板导出为以画板名称命名的 PNG 图片 |
 | 🔒 本地优先 | 内容自动保存在当前设备浏览器存储中，不依赖云服务 |
 
@@ -43,11 +43,11 @@
 
 ### Windows 安装版
 
-下载 [灵感白板-1.5.0-x64-setup.exe](./release/灵感白板-1.5.0-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
+下载 [灵感白板-1.5.1-x64-setup.exe](./release/灵感白板-1.5.1-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
 
 ### Windows 便携版
 
-下载 [灵感白板-1.5.0-x64-portable.exe](./release/灵感白板-1.5.0-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
+下载 [灵感白板-1.5.1-x64-portable.exe](./release/灵感白板-1.5.1-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
 
 > 当前发行文件尚未购买代码签名证书。Windows 首次运行时可能显示 SmartScreen 提示，请核对文件来源后选择“更多信息 → 仍要运行”。
 
@@ -58,7 +58,6 @@
 3. 直接在点阵画布上书写或拖动绘制。
 4. 点击左侧其他画板即可切换，当前内容会自动保存。
 5. 需要分享时点击右上角 **导出**，保存为 PNG 图片。
-6. 授课时点击 **开始演示**，隐藏编辑界面并专注展示。
 
 ### 常用操作
 
