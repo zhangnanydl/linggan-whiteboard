@@ -6,9 +6,9 @@
 
 自由书写、绘制图形、添加便签，并让每一块画板都被自动记住。
 
-[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/Linggan-Whiteboard-1.7.0-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/Linggan-Whiteboard-1.7.0-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
+[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.1/Linggan-Whiteboard-1.7.1-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.1/Linggan-Whiteboard-1.7.1-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
 
-![Version](https://img.shields.io/badge/version-1.7.0-6C5CE7?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.7.1-6C5CE7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![License](https://img.shields.io/badge/license-MIT-22A06B?style=flat-square)
 ![Offline](https://img.shields.io/badge/data-local--only-F59E0B?style=flat-square)
@@ -34,7 +34,7 @@
 | ✍️ 自由书写 | 画笔、荧光笔、粗细和多种颜色，适合鼠标与触控书写 |
 | 📐 图形工具 | 直线、自由箭头、矩形和圆形，快速完成课堂示意图 |
 | 🔗 智能连线 | 点击两个图形自动生成正交折线，移动节点时重新规划，并支持流动动画 |
-| 📝 原位文本 | 点击画布直接输入；矩形和圆形内可直接输入并自动居中、换行与缩放 |
+| 📝 所见即所得文本 | 在画布或图形内直接输入；编辑与完成状态使用相同字体、字号、行高、留白与换行 |
 | 🎨 贴纸 | 在画布中加入表情贴纸，让重点更加醒目 |
 | ↩️ 历史操作 | 支持撤销、重做以及删除当前选中的元素 |
 | 🧽 局部擦除 | 自由笔迹只擦掉经过的局部，橡皮范围可放大缩小，整次拖动支持一步撤销 |
@@ -46,11 +46,11 @@
 
 ### Windows 安装版
 
-从 [GitHub Releases 下载灵感白板-1.7.0 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/Linggan-Whiteboard-1.7.0-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
+从 [GitHub Releases 下载灵感白板-1.7.1 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.1/Linggan-Whiteboard-1.7.1-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
 
 ### Windows 便携版
 
-从 [GitHub Releases 下载灵感白板-1.7.0 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/Linggan-Whiteboard-1.7.0-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
+从 [GitHub Releases 下载灵感白板-1.7.1 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.1/Linggan-Whiteboard-1.7.1-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
 
 > 当前发行文件尚未购买代码签名证书。Windows 首次运行时可能显示 SmartScreen 提示，请核对文件来源后选择“更多信息 → 仍要运行”。
 
@@ -102,7 +102,7 @@
 
 ## 原位文字与图形排版
 
-选择“文本”后，无论点击画布空白处还是矩形、圆形，都可以在当前位置直接输入，不再弹出文字窗口。图形内文字会根据可用空间自动居中、换行并缩放；使用选择工具双击即可再次编辑。
+选择“文本”后，无论点击画布空白处还是矩形、圆形，都可以在当前位置直接输入，不再弹出文字窗口。输入过程与完成后的字体、字号、字重、行高、对齐和换行保持一致。图形内会预留舒适边距，并根据可用空间自动居中与缩放；点击任意其他区域即可确认，使用选择工具双击可再次编辑。
 
 ![矩形内直接输入并自动排版](./docs/images/inline-shape-text.png)
 

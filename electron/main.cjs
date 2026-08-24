@@ -10,6 +10,7 @@ const createWindow = () => {
     show: false,
     backgroundColor: '#ffffff',
     title: '灵感白板',
+    icon: path.join(__dirname, 'icon.png'),
     autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
