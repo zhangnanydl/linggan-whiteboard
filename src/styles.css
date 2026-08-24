@@ -41,3 +41,31 @@
 .tool-dock-trigger{position:absolute;z-index:11;top:7px;left:50%;transform:translateX(-50%);height:30px;padding:0 12px;border:1px solid #d8dfe7;border-radius:0 0 10px 10px;background:rgba(255,255,255,.96);color:#65707d;box-shadow:0 5px 16px rgba(31,39,50,.1);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer}
 .tool-dock-trigger:hover,.tool-dock-trigger:focus-visible{color:var(--blue);background:#f7faff;border-color:#9eb8ee;outline:none}
 @media(max-width:980px){.tool-dock.dock-hidden{transform:translateY(-24px)}}
+
+/* Smart flowchart connectors */
+.board.tool-arrow,.board.tool-connector{cursor:crosshair}
+.tool-dock{width:min(940px,calc(100% - 60px))}
+.tool-row{justify-content:flex-start;overflow-x:auto}
+.tool-button{min-width:70px}
+.flow-toggle{height:40px;min-width:58px;padding:0 8px;border:1px solid #dbe1e8;border-radius:9px;background:#fff;color:#697480;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:10px;font-weight:700;cursor:pointer}
+.flow-toggle:hover{border-color:#9db8ed;color:var(--blue)}
+.flow-toggle.active{border-color:#8eafea;background:#edf4ff;color:var(--blue)}
+.connector-hit{fill:none;stroke:transparent;stroke-width:18;pointer-events:stroke}
+.connector-base,.connector-flow{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.connector-base{opacity:.3}
+.connector-flow{stroke-dasharray:12 9}
+.smart-connector.is-flowing .connector-flow{animation:connector-flow .8s linear infinite}
+@keyframes connector-flow{to{stroke-dashoffset:-21}}
+@media(max-width:980px){.tool-dock{width:auto}}
+
+/* About and author identity */
+.about-dialog{width:min(500px,calc(100vw - 40px))}
+.about-author{display:flex;align-items:center;gap:16px;padding:18px;border:1px solid #e2e7ed;border-radius:14px;background:linear-gradient(135deg,#f7faff,#fff)}
+.author-avatar{width:58px;height:58px;border-radius:17px;background:linear-gradient(135deg,#1459d9,#6c5ce7);color:#fff;display:grid;place-items:center;font-size:25px;font-weight:800;box-shadow:0 8px 20px rgba(20,89,217,.22)}
+.about-author>div:last-child{display:flex;flex-direction:column;gap:3px}.about-author small{color:#7a8490;font-size:12px}.about-author strong{font-size:20px}.about-author a{color:var(--blue);font-size:13px;font-weight:700;text-decoration:none}.about-author a:hover{text-decoration:underline}
+.about-copy{margin:18px 2px;color:#58626e;font-size:14px;line-height:1.7}
+.repository-link{min-height:66px;padding:11px 14px;border:1px solid #dce3eb;border-radius:12px;color:#26313d;text-decoration:none;display:flex;align-items:center;gap:12px}.repository-link:hover{border-color:#9eb8ee;background:#f7faff}.repository-link>span{display:flex;flex:1;flex-direction:column;gap:4px}.repository-link strong{font-size:14px}.repository-link small{color:#727d89;font-size:12px}
+.about-version{margin-top:18px;padding-top:15px;border-top:1px solid #edf0f3;display:flex;justify-content:space-between;color:#7a8490;font-size:12px}.about-version strong{color:#4c5966}
+
+/* Continuous eraser */
+.board.tool-eraser{cursor:cell}

@@ -1,9 +1,17 @@
 {
   "name": "linggan-whiteboard",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "适合课堂教学的桌面白板应用",
-  "author": "Linggan Whiteboard",
+  "author": "张楠 (@zhangnanydl)",
   "license": "MIT",
+  "homepage": "https://github.com/zhangnanydl/linggan-whiteboard#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhangnanydl/linggan-whiteboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zhangnanydl/linggan-whiteboard/issues"
+  },
   "keywords": [
     "whiteboard",
     "teaching",

@@ -5,6 +5,7 @@ import './styles.css';
 const STORAGE_KEY = 'linggan-whiteboard-workspace-v2';
 const UI_STORAGE_KEY = 'linggan-whiteboard-ui-v1';
 const DOCK_STORAGE_KEY = 'linggan-whiteboard-dock-pinned-v1';
+const APP_VERSION = '1.6.0';
 const BOARD_WIDTH = 1600;
 const BOARD_HEIGHT = 1000;
 const COLORS = ['#17191d', '#ff6663', '#ffb21a', '#41a05d', '#175cd3', '#9b6de8'];
@@ -17,8 +18,8 @@ const Icon = ({ name, size = 22 }) => {
     select: <><path d="m5 3 14 9-6.4 1.7L9 20Z"/><path d="m13 14 4 5"/></>,
     pen: <><path d="m4 20 4.4-1 10.9-10.9a2.1 2.1 0 0 0-3-3L5.4 16Z"/><path d="m14.8 6.2 3 3"/></>,
     highlight: <><path d="m5 15 8.8-11 5.2 4-8.8 11H5Z"/><path d="m4 21 6-2"/></>,
-    eraser: <><path d="m7 20-3-3 10-12a2 2 0 0 1 3 0l2 2a2 2 0 0 1 0 3l-8 10Z"/><path d="m11 20 4-5"/><path d="M7 20h12"/></>,
-    line: <path d="M5 19 19 5"/>, rect: <rect x="4" y="4" width="16" height="16" rx="1"/>, circle: <circle cx="12" cy="12" r="8"/>,
+    eraser: <><path d="m4.2 14.2 8.8-8.8a2.1 2.1 0 0 1 3 0l3.2 3.2a2.1 2.1 0 0 1 0 3L12.4 18H8Z"/><path d="m10.5 8 6.2 6.2"/><path d="M12.4 18H21"/></>,
+    line: <path d="M5 19 19 5"/>, arrow: <><path d="M4 18 19 5"/><path d="m12 5 7 0 0 7"/></>, connector: <><path d="M3 7h7v10h8"/><path d="m15 13 4 4-4 4"/></>, rect: <rect x="4" y="4" width="16" height="16" rx="1"/>, circle: <circle cx="12" cy="12" r="8"/>,
     text: <><path d="M5 5h14"/><path d="M12 5v14"/><path d="M8 19h8"/></>,
     sticky: <><path d="M5 4h14v11l-5 5H5Z"/><path d="M14 20v-5h5"/></>,
     sticker: <><circle cx="12" cy="12" r="9"/><path d="M8.5 10h.01M15.5 10h.01"/><path d="M8.5 14c1.4 2 5.6 2 7 0"/></>,
@@ -34,12 +35,15 @@ const Icon = ({ name, size = 22 }) => {
     cloud: <><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9Z"/><path d="M12 12v7m-3-4 3-3 3 3"/></>,
     panelClose: <><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16m7-11-3 3 3 3"/></>,
     panelOpen: <><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16m4 5 3 3-3 3"/></>,
-    pin: <><path d="m14 4 6 6-3 1-4 4-1 5-3-6-5-5 5-1 4-4Z"/><path d="m9 15-5 5"/></>
+    pin: <><path d="m14 4 6 6-3 1-4 4-1 5-3-6-5-5 5-1 4-4Z"/><path d="m9 15-5 5"/></>,
+    flow: <><path d="M3 8h4m3 0h4m3 0h4M3 16h4m3 0h4m3 0h4"/><path d="m18 13 3 3-3 3"/></>,
+    info: <><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7h.01"/></>
   };
   return <svg {...common}>{paths[name]}</svg>;
 };
 
-const TOOLS = [['select','选择'],['pen','画笔'],['highlight','荧光笔'],['eraser','橡皮擦'],['line','直线'],['rect','矩形'],['circle','圆形'],['text','文本'],['sticky','便签'],['sticker','贴纸']];
+const TOOLS = [['select','选择'],['pen','画笔'],['highlight','荧光笔'],['eraser','橡皮擦'],['line','直线'],['arrow','箭头'],['connector','智能连线'],['rect','矩形'],['circle','圆形'],['text','文本'],['sticky','便签'],['sticker','贴纸']];
+const CONNECTABLE_TYPES = new Set(['rect','ellipse','sticky']);
 
 const seedElements = [
   { id:'title',type:'text',x:305,y:280,text:'今天的思考',color:'#17191d',size:48,font:'hand' },
@@ -77,19 +81,45 @@ const loadDockPreference = () => {
   try { return localStorage.getItem(DOCK_STORAGE_KEY) === 'pinned'; } catch { return false; }
 };
 
-const bounds = el => {
+const bounds = (el,elementMap) => {
+  if(el.type==='connector'){
+    const points=connectorRoute(el,elementMap);if(!points.length)return{x:0,y:0,w:1,h:1};
+    const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)};
+  }
   if(el.type==='path'){const xs=el.points.map(p=>p[0]),ys=el.points.map(p=>p[1]);return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)};}
   if(el.type==='line')return{x:Math.min(el.x,el.x2),y:Math.min(el.y,el.y2),w:Math.abs(el.x2-el.x),h:Math.abs(el.y2-el.y)};
   if(el.type==='text')return{x:el.x,y:el.y-el.size,w:Math.max(...el.text.split('\n').map(t=>t.length))*el.size*.72,h:el.size*1.25*el.text.split('\n').length};
   return{x:el.x,y:el.y,w:el.w||1,h:el.h||1};
 };
+const connectorRoute = (el,elementMap) => {
+  const from=elementMap?.get(el.fromId),to=elementMap?.get(el.toId);if(!from||!to)return[];
+  const a=bounds(from),b=bounds(to),ac={x:a.x+a.w/2,y:a.y+a.h/2},bc={x:b.x+b.w/2,y:b.y+b.h/2};
+  const horizontalGap=Math.max(b.x-(a.x+a.w),a.x-(b.x+b.w));
+  const verticalGap=Math.max(b.y-(a.y+a.h),a.y-(b.y+b.h));
+  if(horizontalGap>=verticalGap){
+    const right=bc.x>=ac.x,start=[right?a.x+a.w:a.x,ac.y],end=[right?b.x:b.x+b.w,bc.y],mid=(start[0]+end[0])/2;
+    return[start,[mid,start[1]],[mid,end[1]],end];
+  }
+  const down=bc.y>=ac.y,start=[ac.x,down?a.y+a.h:a.y],end=[bc.x,down?b.y:b.y+b.h],mid=(start[1]+end[1])/2;
+  return[start,[start[0],mid],[end[0],mid],end];
+};
+const arrowHead = (points,size=12) => {
+  if(points.length<2)return'';const end=points.at(-1),before=points.at(-2),dx=end[0]-before[0],dy=end[1]-before[1],length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length,px=-uy,py=ux;
+  return[[end[0],end[1]],[end[0]-ux*size+px*size*.55,end[1]-uy*size+py*size*.55],[end[0]-ux*size-px*size*.55,end[1]-uy*size-py*size*.55]].map(p=>p.join(',')).join(' ');
+};
+const pointNearPolyline = (point,points,tolerance=10) => points.slice(1).some((end,index)=>{const start=points[index],dx=end[0]-start[0],dy=end[1]-start[1],lengthSq=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((point.x-start[0])*dx+(point.y-start[1])*dy)/lengthSq)),x=start[0]+t*dx,y=start[1]+t*dy;return Math.hypot(point.x-x,point.y-y)<=tolerance;});
+const removeElementAndConnections = (items,id) => items.filter(el=>el.id!==id&&!(el.type==='connector'&&(el.fromId===id||el.toId===id)));
 const wrapNote = text => text.split('\n').flatMap(line => line.length>9 ? (line.match(/.{1,9}/g)||[]) : [line]).slice(0,4);
 
-function CanvasElement({el,selected=false,thumbnail=false}){
-  const b=bounds(el),font=el.font==='hand'?"'KaiTi','STKaiti',cursive":"Inter,'Microsoft YaHei',sans-serif";
+function CanvasElement({el,selected=false,thumbnail=false,elementMap}){
+  const b=bounds(el,elementMap),font=el.font==='hand'?"'KaiTi','STKaiti',cursive":"Inter,'Microsoft YaHei',sans-serif";
   let core;
   if(el.type==='path')core=<polyline points={el.points.map(p=>p.join(',')).join(' ')} fill="none" stroke={el.color} strokeWidth={el.width} opacity={el.opacity||1} strokeLinecap="round" strokeLinejoin="round"/>;
-  else if(el.type==='line')core=<g><line x1={el.x} y1={el.y} x2={el.x2} y2={el.y2} stroke={el.color} strokeWidth={el.width} strokeLinecap="round"/>{el.arrow?<path d={`M ${el.x2-12} ${el.y2-8} L ${el.x2} ${el.y2} L ${el.x2-12} ${el.y2+8}`} fill="none" stroke={el.color} strokeWidth={el.width} strokeLinecap="round" strokeLinejoin="round"/>:null}</g>;
+  else if(el.type==='line'){const points=[[el.x,el.y],[el.x2,el.y2]];core=<g><line x1={el.x} y1={el.y} x2={el.x2} y2={el.y2} stroke={el.color} strokeWidth={el.width} strokeLinecap="round"/>{el.arrow?<polygon points={arrowHead(points,12+el.width)} fill={el.color}/>:null}</g>;}
+  else if(el.type==='connector'){
+    const points=connectorRoute(el,elementMap),pointText=points.map(p=>p.join(',')).join(' ');
+    core=points.length?<g className={`smart-connector ${el.animated===false?'':'is-flowing'}`}><polyline className="connector-hit" points={pointText}/><polyline className="connector-base" points={pointText} stroke={el.color} strokeWidth={el.width}/><polyline className="connector-flow" points={pointText} stroke={el.color} strokeWidth={Math.max(2,el.width*.62)}/><polygon points={arrowHead(points,13+el.width)} fill={el.color}/></g>:null;
+  }
   else if(el.type==='rect')core=<rect x={el.x} y={el.y} width={el.w} height={el.h} fill="none" stroke={el.color} strokeWidth={el.width} rx="2"/>;
   else if(el.type==='ellipse')core=<ellipse cx={el.x+el.w/2} cy={el.y+el.h/2} rx={el.w/2} ry={el.h/2} fill="none" stroke={el.color} strokeWidth={el.width}/>;
   else if(el.type==='text')core=<text x={el.x} y={el.y} fill={el.color} fontSize={el.size} fontFamily={font}>{el.text.split('\n').map((line,i)=><tspan key={i} x={el.x} dy={i?el.size*1.25:0}>{line}</tspan>)}</text>;
@@ -99,7 +129,8 @@ function CanvasElement({el,selected=false,thumbnail=false}){
 }
 
 function BoardThumbnail({elements}){
-  return <svg className="board-thumbnail" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`} aria-hidden="true"><rect width={BOARD_WIDTH} height={BOARD_HEIGHT} fill="#fff"/>{elements.slice(0,18).map(el=><CanvasElement key={el.id} el={el} thumbnail/>)}</svg>;
+  const visible=elements.slice(0,18),elementMap=new Map(elements.map(el=>[el.id,el])),ordered=[...visible.filter(el=>el.type==='connector'),...visible.filter(el=>el.type!=='connector')];
+  return <svg className="board-thumbnail" viewBox={`0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}`} aria-hidden="true"><rect width={BOARD_WIDTH} height={BOARD_HEIGHT} fill="#fff"/>{ordered.map(el=><CanvasElement key={el.id} el={el} elementMap={elementMap} thumbnail/>)}</svg>;
 }
 
 function AppDialog({dialog,onClose,onSubmit}){
@@ -135,6 +166,7 @@ function Whiteboard(){
   const [historyIndex,setHistoryIndex]=useState(0);
   const [tool,setTool]=useState('select'); const [color,setColor]=useState('#175cd3'); const [strokeWidth,setStrokeWidth]=useState(4);
   const [selectedId,setSelectedId]=useState(null); const [stickerOpen,setStickerOpen]=useState(false); const [pendingSticker,setPendingSticker]=useState('⭐');
+  const [connectorStartId,setConnectorStartId]=useState(null); const [flowEnabled,setFlowEnabled]=useState(true);
   const [zoom,setZoom]=useState(1); const [camera,setCamera]=useState({x:0,y:0}); const [viewportSize,setViewportSize]=useState({width:1280,height:720});
   const [isPanning,setIsPanning]=useState(false); const [spacePressed,setSpacePressed]=useState(false); const [hoveringElement,setHoveringElement]=useState(false);
   const [dockPinned,setDockPinned]=useState(loadDockPreference); const [dockVisible,setDockVisible]=useState(true);
@@ -142,6 +174,9 @@ function Whiteboard(){
   const [sidebarOpen,setSidebarOpen]=useState(loadSidebarPreference); const [search,setSearch]=useState(''); const [dialog,setDialog]=useState(null); const [saveState,setSaveState]=useState('saved');
   const svgRef=useRef(null),viewportRef=useRef(null),gesture=useRef(null),keyboardState=useRef(null),saveTimer=useRef(null),dockTimer=useRef(null),dockHovered=useRef(false);
   const activeBoard=boards.find(b=>b.id===activeBoardId)||boards[0];
+  const elementMap=useMemo(()=>new Map(elements.map(el=>[el.id,el])),[elements]);
+  const orderedElements=useMemo(()=>[...elements.filter(el=>el.type==='connector'),...elements.filter(el=>el.type!=='connector')],[elements]);
+  const selectedConnector=selectedId?elementMap.get(selectedId):null;
 
   const flash=message=>{setToast(message);window.setTimeout(()=>setToast(''),1800);};
   const clearDockTimer=()=>window.clearTimeout(dockTimer.current);
@@ -150,39 +185,49 @@ function Whiteboard(){
   const leaveDock=()=>{dockHovered.current=false;armDockTimer();};
   const persistElements=next=>{setElements(next);setBoards(prev=>prev.map(b=>b.id===activeBoardId?{...b,elements:clone(next),updatedAt:Date.now()}:b));setSaveState('saving');};
   const commit=next=>{const sliced=history.slice(0,historyIndex+1);persistElements(next);setHistory([...sliced,clone(next)]);setHistoryIndex(sliced.length);};
-  const undo=()=>{if(historyIndex>0){const i=historyIndex-1;setHistoryIndex(i);persistElements(clone(history[i]));setSelectedId(null);}};
-  const redo=()=>{if(historyIndex<history.length-1){const i=historyIndex+1;setHistoryIndex(i);persistElements(clone(history[i]));setSelectedId(null);}};
+  const undo=()=>{if(historyIndex>0){const i=historyIndex-1;setHistoryIndex(i);persistElements(clone(history[i]));setSelectedId(null);setConnectorStartId(null);}};
+  const redo=()=>{if(historyIndex<history.length-1){const i=historyIndex+1;setHistoryIndex(i);persistElements(clone(history[i]));setSelectedId(null);setConnectorStartId(null);}};
 
   useEffect(()=>{window.clearTimeout(saveTimer.current);saveTimer.current=window.setTimeout(()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify({boards,activeBoardId}));setSaveState('saved');}catch{setSaveState('error');}},220);return()=>window.clearTimeout(saveTimer.current);},[boards,activeBoardId]);
   useEffect(()=>{try{localStorage.setItem(UI_STORAGE_KEY,sidebarOpen?'open':'closed');}catch{ /* keep the current session state */ }},[sidebarOpen]);
   useEffect(()=>{try{localStorage.setItem(DOCK_STORAGE_KEY,dockPinned?'pinned':'auto');}catch{ /* keep the current session state */ }clearDockTimer();if(dockPinned)setDockVisible(true);else armDockTimer();return clearDockTimer;},[dockPinned]);
   useEffect(()=>{const node=viewportRef.current;if(!node)return;const update=()=>setViewportSize({width:node.clientWidth||1280,height:node.clientHeight||720});update();const observer=new ResizeObserver(update);observer.observe(node);return()=>observer.disconnect();},[]);
 
-  const switchBoard=id=>{const next=boards.find(b=>b.id===id);if(!next||id===activeBoardId)return;setActiveBoardId(id);setElements(clone(next.elements));setHistory([clone(next.elements)]);setHistoryIndex(0);setSelectedId(null);setStickerOpen(false);setCamera({x:0,y:0});setZoom(1);setSaveState('saved');};
-  const createBoard=title=>{const board=makeBoard(title,[]);setBoards(prev=>[board,...prev]);setActiveBoardId(board.id);setElements([]);setHistory([[]]);setHistoryIndex(0);setSelectedId(null);setCamera({x:0,y:0});setZoom(1);setSaveState('saving');flash('新画板已创建');};
+  const switchBoard=id=>{const next=boards.find(b=>b.id===id);if(!next||id===activeBoardId)return;setActiveBoardId(id);setElements(clone(next.elements));setHistory([clone(next.elements)]);setHistoryIndex(0);setSelectedId(null);setConnectorStartId(null);setStickerOpen(false);setCamera({x:0,y:0});setZoom(1);setSaveState('saved');};
+  const createBoard=title=>{const board=makeBoard(title,[]);setBoards(prev=>[board,...prev]);setActiveBoardId(board.id);setElements([]);setHistory([[]]);setHistoryIndex(0);setSelectedId(null);setConnectorStartId(null);setCamera({x:0,y:0});setZoom(1);setSaveState('saving');flash('新画板已创建');};
   const renameBoard=(id,title)=>{setBoards(prev=>prev.map(b=>b.id===id?{...b,title,updatedAt:Date.now()}:b));setSaveState('saving');flash('画板名称已保存');};
   const deleteBoard=id=>{if(boards.length===1){flash('至少保留一个画板');return;}const remaining=boards.filter(b=>b.id!==id);setBoards(remaining);if(id===activeBoardId){setActiveBoardId(remaining[0].id);setElements(clone(remaining[0].elements));setHistory([clone(remaining[0].elements)]);setHistoryIndex(0);setCamera({x:0,y:0});setZoom(1);}setSaveState('saving');flash('画板已删除');};
 
   const viewWidth=viewportSize.width/zoom,viewHeight=viewportSize.height/zoom;
   const point=event=>{const r=svgRef.current.getBoundingClientRect();return{x:camera.x+(event.clientX-r.left)*viewWidth/r.width,y:camera.y+(event.clientY-r.top)*viewHeight/r.height};};
-  const hitTest=({x,y})=>[...elements].reverse().find(el=>{const b=bounds(el);return x>=b.x-10&&x<=b.x+b.w+10&&y>=b.y-10&&y<=b.y+b.h+10;});
+  const findHit=(point,items)=>{const itemMap=items===elements?elementMap:new Map(items.map(el=>[el.id,el])),ordered=[...items.filter(el=>el.type==='connector'),...items.filter(el=>el.type!=='connector')];return[...ordered].reverse().find(el=>{if(el.type==='connector')return pointNearPolyline(point,connectorRoute(el,itemMap),12/zoom);if(el.type==='path')return pointNearPolyline(point,el.points,Math.max(9,(el.width||2)/2+4)/zoom);if(el.type==='line')return pointNearPolyline(point,[[el.x,el.y],[el.x2,el.y2]],Math.max(9,(el.width||2)/2+4)/zoom);const b=bounds(el);return point.x>=b.x-8&&point.x<=b.x+b.w+8&&point.y>=b.y-8&&point.y<=b.y+b.h+8;});};
+  const hitTest=point=>findHit(point,elements);
+  const hitConnectable=point=>[...elements].reverse().find(el=>{if(!CONNECTABLE_TYPES.has(el.type))return false;const b=bounds(el);return point.x>=b.x&&point.x<=b.x+b.w&&point.y>=b.y&&point.y<=b.y+b.h;});
   const openElementDialog=(type,p,edit=null)=>setDialog({type,x:p.x,y:p.y,editId:edit?.id,value:edit?.text||'',color:edit?.color||NOTE_COLORS[0]});
 
   const onPointerDown=event=>{
     if(event.button!==0&&event.button!==1)return;event.preventDefault();if(!dockPinned){clearDockTimer();dockHovered.current=false;setDockVisible(false);}const p=point(event),hit=hitTest(p);svgRef.current.setPointerCapture(event.pointerId);
     if(event.button===1||spacePressed||(tool==='select'&&!hit)){setSelectedId(null);setIsPanning(true);gesture.current={kind:'pan',startClient:{x:event.clientX,y:event.clientY},startCamera:camera};return;}
-    if(tool==='select'){setSelectedId(hit?.id||null);if(hit)gesture.current={kind:'move',start:p,original:hit,base:elements};return;}
-    if(tool==='eraser'){const hit=hitTest(p);if(hit)commit(elements.filter(e=>e.id!==hit.id));return;}
+    if(tool==='select'){setSelectedId(hit?.id||null);if(hit&&hit.type!=='connector')gesture.current={kind:'move',start:p,original:hit,base:elements};return;}
+    if(tool==='connector'){
+      const shape=hitConnectable(p);
+      if(!shape){setConnectorStartId(null);setSelectedId(null);flash('请点击矩形、圆形或便签进行连接');return;}
+      if(!connectorStartId){setConnectorStartId(shape.id);setSelectedId(shape.id);flash('已选择起点，请点击目标图形');return;}
+      if(connectorStartId===shape.id){flash('请选择另一个图形作为终点');return;}
+      const id=crypto.randomUUID(),next=[...elements,{id,type:'connector',fromId:connectorStartId,toId:shape.id,color,width:strokeWidth,animated:flowEnabled}];
+      commit(next);setConnectorStartId(null);setSelectedId(id);flash('智能连线已创建');return;
+    }
+    if(tool==='eraser'){gesture.current={kind:'erase',base:elements,changed:false};if(hit){gesture.current.changed=true;setElements(removeElementAndConnections(elements,hit.id));}setSelectedId(null);setConnectorStartId(null);return;}
     if(tool==='text'){openElementDialog('text',p);return;} if(tool==='sticky'){openElementDialog('sticky',p);return;}
     if(tool==='sticker'){commit([...elements,{id:crypto.randomUUID(),type:'sticker',x:p.x-42,y:p.y-42,w:84,h:84,text:pendingSticker}]);return;}
     const id=crypto.randomUUID(),base={id,color,width:tool==='highlight'?18:strokeWidth};let el;
     if(tool==='pen'||tool==='highlight')el={...base,type:'path',opacity:tool==='highlight'?.35:1,points:[[p.x,p.y]]};
-    else if(tool==='line')el={...base,type:'line',x:p.x,y:p.y,x2:p.x,y2:p.y};
+    else if(tool==='line'||tool==='arrow')el={...base,type:'line',x:p.x,y:p.y,x2:p.x,y2:p.y,arrow:tool==='arrow'};
     else if(tool==='rect'||tool==='circle')el={...base,type:tool==='circle'?'ellipse':'rect',x:p.x,y:p.y,w:0,h:0};
     if(el){setElements([...elements,el]);gesture.current={kind:'draw',id,start:p,base:elements};}
   };
-  const onPointerMove=event=>{const g=gesture.current;if(!g){if(tool==='select')setHoveringElement(Boolean(hitTest(point(event))));return;}if(g.kind==='pan'){setCamera({x:g.startCamera.x-(event.clientX-g.startClient.x)/zoom,y:g.startCamera.y-(event.clientY-g.startClient.y)/zoom});return;}const p=point(event);if(g.kind==='move'){const dx=p.x-g.start.x,dy=p.y-g.start.y;setElements(g.base.map(el=>el.id!==g.original.id?el:el.type==='path'?{...el,points:el.points.map(q=>[q[0]+dx,q[1]+dy])}:el.type==='line'?{...el,x:el.x+dx,y:el.y+dy,x2:el.x2+dx,y2:el.y2+dy}:{...el,x:el.x+dx,y:el.y+dy}));return;}setElements(current=>current.map(el=>el.id!==g.id?el:el.type==='path'?{...el,points:[...el.points,[p.x,p.y]]}:el.type==='line'?{...el,x2:p.x,y2:p.y}:{...el,x:Math.min(g.start.x,p.x),y:Math.min(g.start.y,p.y),w:Math.abs(p.x-g.start.x),h:Math.abs(p.y-g.start.y)}));};
-  const onPointerUp=()=>{if(!gesture.current)return;const g=gesture.current;gesture.current=null;if(g.kind==='pan'){setIsPanning(false);return;}const next=elements,sliced=history.slice(0,historyIndex+1);persistElements(next);setHistory([...sliced,clone(next)]);setHistoryIndex(sliced.length);if(g.kind==='draw')setSelectedId(g.id);};
+  const onPointerMove=event=>{const g=gesture.current;if(!g){if(tool==='select')setHoveringElement(Boolean(hitTest(point(event))));return;}if(g.kind==='pan'){setCamera({x:g.startCamera.x-(event.clientX-g.startClient.x)/zoom,y:g.startCamera.y-(event.clientY-g.startClient.y)/zoom});return;}const p=point(event);if(g.kind==='erase'){setElements(current=>{const target=findHit(p,current);if(!target)return current;g.changed=true;return removeElementAndConnections(current,target.id);});return;}if(g.kind==='move'){const dx=p.x-g.start.x,dy=p.y-g.start.y;setElements(g.base.map(el=>el.id!==g.original.id?el:el.type==='path'?{...el,points:el.points.map(q=>[q[0]+dx,q[1]+dy])}:el.type==='line'?{...el,x:el.x+dx,y:el.y+dy,x2:el.x2+dx,y2:el.y2+dy}:{...el,x:el.x+dx,y:el.y+dy}));return;}setElements(current=>current.map(el=>el.id!==g.id?el:el.type==='path'?{...el,points:[...el.points,[p.x,p.y]]}:el.type==='line'?{...el,x2:p.x,y2:p.y}:{...el,x:Math.min(g.start.x,p.x),y:Math.min(g.start.y,p.y),w:Math.abs(p.x-g.start.x),h:Math.abs(p.y-g.start.y)}));};
+  const onPointerUp=()=>{if(!gesture.current)return;const g=gesture.current;gesture.current=null;if(g.kind==='pan'){setIsPanning(false);return;}if(g.kind==='erase'&&!g.changed)return;const next=elements,sliced=history.slice(0,historyIndex+1);persistElements(next);setHistory([...sliced,clone(next)]);setHistoryIndex(sliced.length);if(g.kind==='draw')setSelectedId(g.id);};
   const onDoubleClick=event=>{if(tool!=='select')return;const hit=hitTest(point(event));if(hit?.type==='sticky'||hit?.type==='text')openElementDialog(hit.type,{x:hit.x,y:hit.y},hit);};
 
   const submitDialog=data=>{
@@ -193,21 +238,23 @@ function Whiteboard(){
   };
 
   keyboardState.current={undo,redo,selectedId,elements,commit};
-  useEffect(()=>{const keyDown=e=>{const s=keyboardState.current;if(e.code==='Space'&&!dialog&&!/INPUT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();setSpacePressed(true);}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?s.redo():s.undo();}if((e.key==='Delete'||e.key==='Backspace')&&s.selectedId&&!dialog){e.preventDefault();s.commit(s.elements.filter(x=>x.id!==s.selectedId));setSelectedId(null);}if(e.key==='Escape'){setSelectedId(null);setStickerOpen(false);setSpacePressed(false);}};const keyUp=e=>{if(e.code==='Space')setSpacePressed(false);};window.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);return()=>{window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);};},[dialog]);
+  useEffect(()=>{const keyDown=e=>{const s=keyboardState.current;if(e.code==='Space'&&!dialog&&!/INPUT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();setSpacePressed(true);}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?s.redo():s.undo();}if((e.key==='Delete'||e.key==='Backspace')&&s.selectedId&&!dialog){e.preventDefault();s.commit(removeElementAndConnections(s.elements,s.selectedId));setSelectedId(null);setConnectorStartId(null);}if(e.key==='Escape'){if(dialog)setDialog(null);setSelectedId(null);setConnectorStartId(null);setStickerOpen(false);setSpacePressed(false);}};const keyUp=e=>{if(e.code==='Space')setSpacePressed(false);};window.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);return()=>{window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);};},[dialog]);
+
+  const toggleFlow=()=>{if(selectedConnector?.type==='connector'){commit(elements.map(el=>el.id===selectedId?{...el,animated:el.animated===false}:el));}else setFlowEnabled(value=>!value);};
 
   const exportPng=()=>{const copy=svgRef.current.cloneNode(true);copy.setAttribute('width',BOARD_WIDTH);copy.setAttribute('height',BOARD_HEIGHT);copy.setAttribute('viewBox',`${camera.x} ${camera.y} ${viewWidth} ${viewHeight}`);const source=new XMLSerializer().serializeToString(copy),blob=new Blob([source],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=BOARD_WIDTH;c.height=BOARD_HEIGHT;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,c.width,c.height);const a=document.createElement('a');a.download=`${activeBoard.title}.png`;a.href=c.toDataURL('image/png');a.click();URL.revokeObjectURL(url);flash('当前视野已导出为 PNG');};img.src=url;};
 
   return <main className="app">
-    <header className="topbar"><div className="identity"><div className="logo"><Icon name="bulb" size={24}/></div><strong>灵感白板</strong><button className={`library-toggle ${sidebarOpen?'active':''}`} onClick={()=>setSidebarOpen(!sidebarOpen)} aria-expanded={sidebarOpen} title={sidebarOpen?'收起画板库':'展开画板库'}><Icon name={sidebarOpen?'panelClose':'panelOpen'} size={19}/>我的画板<span>{boards.length}</span></button><button className="board-title-button" onClick={()=>setDialog({type:'board',mode:'rename',boardId:activeBoard.id,value:activeBoard.title})}>{activeBoard.title}<Icon name="edit" size={17}/></button><div className={`save-status ${saveState}`}><span><Icon name="check" size={14}/></span>{saveState==='saving'?'保存中…':saveState==='error'?'保存失败':'已自动保存'}</div></div><div className="actions"><button className="secondary" onClick={()=>setDialog({type:'delete-content'})}><Icon name="trash" size={18}/>清空</button><button className="secondary" onClick={exportPng}><Icon name="download" size={18}/>导出</button></div></header>
+    <header className="topbar"><div className="identity"><div className="logo"><Icon name="bulb" size={24}/></div><strong>灵感白板</strong><button className={`library-toggle ${sidebarOpen?'active':''}`} onClick={()=>setSidebarOpen(!sidebarOpen)} aria-expanded={sidebarOpen} title={sidebarOpen?'收起画板库':'展开画板库'}><Icon name={sidebarOpen?'panelClose':'panelOpen'} size={19}/>我的画板<span>{boards.length}</span></button><button className="board-title-button" onClick={()=>setDialog({type:'board',mode:'rename',boardId:activeBoard.id,value:activeBoard.title})}>{activeBoard.title}<Icon name="edit" size={17}/></button><div className={`save-status ${saveState}`}><span><Icon name="check" size={14}/></span>{saveState==='saving'?'保存中…':saveState==='error'?'保存失败':'已自动保存'}</div></div><div className="actions"><button className="secondary about-button" onClick={()=>setDialog({type:'about'})}><Icon name="info" size={18}/>关于</button><button className="secondary" onClick={()=>setDialog({type:'delete-content'})}><Icon name="trash" size={18}/>清空</button><button className="secondary" onClick={exportPng}><Icon name="download" size={18}/>导出</button></div></header>
     {sidebarOpen?<BoardSidebar boards={boards} activeId={activeBoardId} search={search} setSearch={setSearch} onSelect={switchBoard} onNew={()=>setDialog({type:'board',mode:'new',value:`未命名画板 ${boards.length+1}`})} onRename={b=>setDialog({type:'board',mode:'rename',boardId:b.id,value:b.title})} onDelete={b=>setDialog({type:'delete',boardId:b.id,boardTitle:b.title})} onClose={()=>setSidebarOpen(false)}/>:null}
     {!sidebarOpen?<button className="sidebar-reopen" onClick={()=>setSidebarOpen(true)} aria-label="展开画板库" title="展开画板库"><Icon name="panelOpen" size={21}/><span>画板库</span></button>:null}
     <section className={`workspace ${sidebarOpen?'with-sidebar':''}`}>
       {!dockVisible?<button className="tool-dock-trigger" aria-label="显示工具箱" title="鼠标移入显示工具箱" onMouseEnter={enterDock} onFocus={enterDock} onClick={enterDock}><Icon name="pin" size={16}/><span>工具</span></button>:null}
-      <div className={`tool-dock ${dockVisible?'':'dock-hidden'}`} role="toolbar" aria-label="白板工具" onMouseEnter={enterDock} onMouseLeave={leaveDock} onPointerDown={armDockTimer}><div className="tool-row">{TOOLS.map(([id,label])=><button key={id} title={label} className={`tool-button ${tool===id?'active':''}`} onClick={()=>{setTool(id);setStickerOpen(id==='sticker'?!stickerOpen:false);}}><Icon name={id}/><span>{label}</span></button>)}</div><div className="option-row"><div className="colors">{COLORS.map(c=><button key={c} aria-label={`选择颜色 ${c}`} className={`swatch ${color===c?'selected':''}`} style={{background:c}} onClick={()=>setColor(c)}/>)}</div><span className="small-divider"/><button className="icon-only" aria-label="减小笔画" onClick={()=>setStrokeWidth(Math.max(2,strokeWidth-1))}><Icon name="minus" size={18}/></button><span className="stroke-preview" style={{height:strokeWidth,background:color}}/><button className="icon-only" aria-label="增大笔画" onClick={()=>setStrokeWidth(Math.min(12,strokeWidth+1))}><Icon name="plus" size={18}/></button><span className="small-divider"/><button className="history-button" disabled={historyIndex===0} onClick={undo}><Icon name="undo" size={20}/><span>撤销</span></button><button className="history-button" disabled={historyIndex===history.length-1} onClick={redo}><Icon name="redo" size={20}/><span>重做</span></button><span className="small-divider"/><button className={`dock-pin ${dockPinned?'active':''}`} aria-label={dockPinned?'取消固定工具箱':'固定工具箱'} aria-pressed={dockPinned} title={dockPinned?'取消固定，5 秒后自动隐藏':'固定工具箱一直显示'} onClick={()=>setDockPinned(value=>!value)}><Icon name="pin" size={18}/><span>{dockPinned?'已固定':'固定'}</span></button></div>{stickerOpen?<div className="sticker-panel"><div className="panel-title"><span>选择贴纸</span><button onClick={()=>setStickerOpen(false)} aria-label="关闭"><Icon name="x" size={18}/></button></div><div className="sticker-grid">{STICKERS.map(s=><button key={s} className={pendingSticker===s?'chosen':''} onClick={()=>{setPendingSticker(s);setTool('sticker');}}>{s}</button>)}</div><p>选择后在白板任意位置点击</p></div>:null}</div>
-      <div className="canvas-viewport" ref={viewportRef}><svg ref={svgRef} className={`board infinite-board tool-${tool} ${isPanning?'panning':''} ${spacePressed?'pan-ready':''} ${hoveringElement?'hover-element':''}`} viewBox={`${camera.x} ${camera.y} ${viewWidth} ${viewHeight}`} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerLeave={()=>setHoveringElement(false)} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onDoubleClick={onDoubleClick}><defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#dfe4ea"/></pattern></defs><rect x={camera.x} y={camera.y} width={viewWidth} height={viewHeight} fill="#fff"/><rect x={camera.x} y={camera.y} width={viewWidth} height={viewHeight} fill="url(#dots)"/>{elements.map(el=><CanvasElement key={el.id} el={el} selected={selectedId===el.id}/>)}</svg></div>
+      <div className={`tool-dock ${dockVisible?'':'dock-hidden'}`} role="toolbar" aria-label="白板工具" onMouseEnter={enterDock} onMouseLeave={leaveDock} onPointerDown={armDockTimer}><div className="tool-row">{TOOLS.map(([id,label])=><button key={id} title={id==='connector'?'依次点击两个图形，自动规划路径':label} className={`tool-button ${tool===id?'active':''}`} onClick={()=>{setTool(id);setConnectorStartId(null);setSelectedId(null);setStickerOpen(id==='sticker'?!stickerOpen:false);}}><Icon name={id}/><span>{label}</span></button>)}</div><div className="option-row"><div className="colors">{COLORS.map(c=><button key={c} aria-label={`选择颜色 ${c}`} className={`swatch ${color===c?'selected':''}`} style={{background:c}} onClick={()=>setColor(c)}/>)}</div><span className="small-divider"/><button className="icon-only" aria-label="减小笔画" onClick={()=>setStrokeWidth(Math.max(2,strokeWidth-1))}><Icon name="minus" size={18}/></button><span className="stroke-preview" style={{height:strokeWidth,background:color}}/><button className="icon-only" aria-label="增大笔画" onClick={()=>setStrokeWidth(Math.min(12,strokeWidth+1))}><Icon name="plus" size={18}/></button><span className="small-divider"/><button className={`flow-toggle ${(selectedConnector?.type==='connector'?selectedConnector.animated!==false:flowEnabled)?'active':''}`} aria-pressed={selectedConnector?.type==='connector'?selectedConnector.animated!==false:flowEnabled} title={selectedConnector?.type==='connector'?'切换当前连线流动效果':'设置新连线的流动效果'} onClick={toggleFlow}><Icon name="flow" size={19}/><span>流动</span></button><span className="small-divider"/><button className="history-button" disabled={historyIndex===0} onClick={undo}><Icon name="undo" size={20}/><span>撤销</span></button><button className="history-button" disabled={historyIndex===history.length-1} onClick={redo}><Icon name="redo" size={20}/><span>重做</span></button><span className="small-divider"/><button className={`dock-pin ${dockPinned?'active':''}`} aria-label={dockPinned?'取消固定工具箱':'固定工具箱'} aria-pressed={dockPinned} title={dockPinned?'取消固定，5 秒后自动隐藏':'固定工具箱一直显示'} onClick={()=>setDockPinned(value=>!value)}><Icon name="pin" size={18}/><span>{dockPinned?'已固定':'固定'}</span></button></div>{stickerOpen?<div className="sticker-panel"><div className="panel-title"><span>选择贴纸</span><button onClick={()=>setStickerOpen(false)} aria-label="关闭"><Icon name="x" size={18}/></button></div><div className="sticker-grid">{STICKERS.map(s=><button key={s} className={pendingSticker===s?'chosen':''} onClick={()=>{setPendingSticker(s);setTool('sticker');}}>{s}</button>)}</div><p>选择后在白板任意位置点击</p></div>:null}</div>
+      <div className="canvas-viewport" ref={viewportRef}><svg ref={svgRef} className={`board infinite-board tool-${tool} ${isPanning?'panning':''} ${spacePressed?'pan-ready':''} ${hoveringElement?'hover-element':''}`} viewBox={`${camera.x} ${camera.y} ${viewWidth} ${viewHeight}`} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerLeave={()=>setHoveringElement(false)} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onDoubleClick={onDoubleClick}><defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#dfe4ea"/></pattern></defs><rect x={camera.x} y={camera.y} width={viewWidth} height={viewHeight} fill="#fff"/><rect x={camera.x} y={camera.y} width={viewWidth} height={viewHeight} fill="url(#dots)"/>{orderedElements.map(el=><CanvasElement key={el.id} el={el} elementMap={elementMap} selected={selectedId===el.id||connectorStartId===el.id}/>)}</svg></div>
       <div className="page-control"><strong>无限画布</strong><span/><small>空白处拖动</small></div><div className="zoom-control"><button aria-label="缩小" onClick={()=>setZoom(Math.max(.4,+(zoom-.1).toFixed(1)))}><Icon name="minus" size={19}/></button><strong>{Math.round(zoom*100)}%</strong><button aria-label="放大" onClick={()=>setZoom(Math.min(2.5,+(zoom+.1).toFixed(1)))}><Icon name="plus" size={19}/></button><span/><button aria-label="回到原点" title="回到原点" onClick={()=>{setZoom(1);setCamera({x:0,y:0});}}><Icon name="fit" size={20}/></button></div>
     </section>
-    {dialog?.type==='delete-content'?<div className="modal-scrim"><div className="app-dialog" role="dialog" aria-modal="true"><div className="dialog-head"><h2>清空当前画板</h2><button className="dialog-close" onClick={()=>setDialog(null)}><Icon name="x"/></button></div><div className="delete-copy"><div className="delete-symbol"><Icon name="trash"/></div><p>确定清空“{activeBoard.title}”吗？画板本身会保留，但其中所有内容将被删除。</p></div><div className="dialog-actions"><button className="secondary" onClick={()=>setDialog(null)}>取消</button><button className="danger" onClick={()=>{commit([]);setDialog(null);}}>确认清空</button></div></div></div>:dialog?<AppDialog key={`${dialog.type}-${dialog.mode||''}-${dialog.editId||dialog.boardId||''}`} dialog={dialog} onClose={()=>setDialog(null)} onSubmit={submitDialog}/>:null}
+    {dialog?.type==='about'?<div className="modal-scrim" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setDialog(null);}}><div className="app-dialog about-dialog" role="dialog" aria-modal="true" aria-labelledby="about-title"><div className="dialog-head"><h2 id="about-title">关于灵感白板</h2><button className="dialog-close" onClick={()=>setDialog(null)} aria-label="关闭"><Icon name="x"/></button></div><div className="about-author"><div className="author-avatar">楠</div><div><small>设计与开发</small><strong>张楠</strong><a href="https://github.com/zhangnanydl" target="_blank" rel="noreferrer">GitHub · @zhangnanydl</a></div></div><p className="about-copy">为课堂教学打造的本地优先无限白板。欢迎在 GitHub 查看源码、提交建议并参与改进。</p><a className="repository-link" href="https://github.com/zhangnanydl/linggan-whiteboard" target="_blank" rel="noreferrer"><Icon name="grid" size={19}/><span><strong>开源项目仓库</strong><small>zhangnanydl/linggan-whiteboard</small></span><Icon name="arrow" size={18}/></a><div className="about-version"><span>灵感白板</span><strong>v{APP_VERSION}</strong></div></div></div>:dialog?.type==='delete-content'?<div className="modal-scrim"><div className="app-dialog" role="dialog" aria-modal="true"><div className="dialog-head"><h2>清空当前画板</h2><button className="dialog-close" onClick={()=>setDialog(null)}><Icon name="x"/></button></div><div className="delete-copy"><div className="delete-symbol"><Icon name="trash"/></div><p>确定清空“{activeBoard.title}”吗？画板本身会保留，但其中所有内容将被删除。</p></div><div className="dialog-actions"><button className="secondary" onClick={()=>setDialog(null)}>取消</button><button className="danger" onClick={()=>{commit([]);setDialog(null);}}>确认清空</button></div></div></div>:dialog?<AppDialog key={`${dialog.type}-${dialog.mode||''}-${dialog.editId||dialog.boardId||''}`} dialog={dialog} onClose={()=>setDialog(null)} onSubmit={submitDialog}/>:null}
     {toast?<div className="toast">{toast}</div>:null}
   </main>;
 }
