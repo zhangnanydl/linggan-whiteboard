@@ -6,7 +6,7 @@
 
 自由书写、绘制图形、添加便签，并让每一块画板都被自动记住。
 
-[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/灵感白板-1.7.0-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/灵感白板-1.7.0-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
+[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/Linggan-Whiteboard-1.7.0-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/Linggan-Whiteboard-1.7.0-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
 
 ![Version](https://img.shields.io/badge/version-1.7.0-6C5CE7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
@@ -46,11 +46,11 @@
 
 ### Windows 安装版
 
-从 [GitHub Releases 下载灵感白板-1.7.0 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/灵感白板-1.7.0-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
+从 [GitHub Releases 下载灵感白板-1.7.0 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/Linggan-Whiteboard-1.7.0-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
 
 ### Windows 便携版
 
-从 [GitHub Releases 下载灵感白板-1.7.0 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/灵感白板-1.7.0-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
+从 [GitHub Releases 下载灵感白板-1.7.0 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.0/Linggan-Whiteboard-1.7.0-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
 
 > 当前发行文件尚未购买代码签名证书。Windows 首次运行时可能显示 SmartScreen 提示，请核对文件来源后选择“更多信息 → 仍要运行”。
 
