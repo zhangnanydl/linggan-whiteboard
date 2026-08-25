@@ -6,9 +6,9 @@
 
 自由书写、绘制图形、添加便签，并让每一块画板都被自动记住。
 
-[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.1/Linggan-Whiteboard-1.7.1-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.1/Linggan-Whiteboard-1.7.1-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
+[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.2/Linggan-Whiteboard-1.7.2-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.2/Linggan-Whiteboard-1.7.2-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
 
-![Version](https://img.shields.io/badge/version-1.7.1-6C5CE7?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.7.2-6C5CE7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![License](https://img.shields.io/badge/license-MIT-22A06B?style=flat-square)
 ![Offline](https://img.shields.io/badge/data-local--only-F59E0B?style=flat-square)
@@ -32,10 +32,12 @@
 | 📌 智能工具箱 | 图钉固定后始终显示；未固定时点击画布立即隐藏，悬停立即唤回 |
 | 🖱️ 滚轮切换 | 在画布上滚动鼠标滚轮切换工具，默认轮询全部，也可自定义 3–5 个常用工具 |
 | ✍️ 自由书写 | 画笔、荧光笔、粗细和多种颜色，适合鼠标与触控书写 |
-| 📐 图形工具 | 直线、自由箭头、矩形和圆形，快速完成课堂示意图 |
-| 🔗 智能连线 | 点击两个图形自动生成正交折线，移动节点时重新规划，并支持流动动画 |
+| 🧰 工具分区 | 上方大区域集中画板书写工具，下方独立提供黑色流程图工具，课堂操作更清楚 |
+| 📐 流程图形 | 矩形、圆形、菱形、小人和电脑，默认黑色图形与黑色文字 |
+| 🔗 智能连线 | 点击两个流程节点自动生成黑色正交折线，移动节点时重新规划，并支持流动动画 |
 | 📝 所见即所得文本 | 在画布或图形内直接输入；编辑与完成状态使用相同字体、字号、行高、留白与换行 |
 | 🎨 贴纸 | 在画布中加入表情贴纸，让重点更加醒目 |
+| 📋 选择复制 | 选中元素后使用工具箱“复制”，或通过 `Ctrl + C` / `Ctrl + V`、`Ctrl + D` 快速创建错位副本 |
 | ↩️ 历史操作 | 支持撤销、重做以及删除当前选中的元素 |
 | 🧽 局部擦除 | 自由笔迹只擦掉经过的局部，橡皮范围可放大缩小，整次拖动支持一步撤销 |
 | 🔍 画布控制 | 40%–250% 缩放、回到原点和空白处拖动画布 |
@@ -46,11 +48,11 @@
 
 ### Windows 安装版
 
-从 [GitHub Releases 下载灵感白板-1.7.1 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.1/Linggan-Whiteboard-1.7.1-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
+从 [GitHub Releases 下载灵感白板-1.7.2 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.2/Linggan-Whiteboard-1.7.2-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
 
 ### Windows 便携版
 
-从 [GitHub Releases 下载灵感白板-1.7.1 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.1/Linggan-Whiteboard-1.7.1-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
+从 [GitHub Releases 下载灵感白板-1.7.2 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.7.2/Linggan-Whiteboard-1.7.2-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
 
 > 当前发行文件尚未购买代码签名证书。Windows 首次运行时可能显示 SmartScreen 提示，请核对文件来源后选择“更多信息 → 仍要运行”。
 
@@ -67,12 +69,14 @@
 | 操作 | 方法 |
 | --- | --- |
 | 选择元素 | 选择“选择”工具后点击元素 |
+| 复制选中元素 | 点击工具箱“复制”，或按 `Ctrl + D`；也可使用 `Ctrl + C` 后按 `Ctrl + V` |
 | 拖动画布 | 选择工具下拖动空白处，或按住空格键/鼠标中键拖动 |
 | 输入画布文字 | 选择“文本”后点击空白处，直接输入，`Ctrl + Enter` 完成 |
 | 输入图形文字 | 选择“文本”后点击矩形或圆形，文字自动居中排版 |
 | 再次编辑 | 使用“选择”双击文字、矩形、圆形或便签 |
 | 调节橡皮 | 选择“橡皮擦”后用工具箱的减号、加号调节擦除范围 |
 | 滚轮切换工具 | 鼠标位于画布时，向下滚动切换下一个工具，向上滚动返回上一个 |
+| 创建流程图 | 在工具箱下方“流程图”区域选择节点，拖动绘制后可直接输入黑色文字 |
 | 创建智能连线 | 选择“智能连线”，依次点击起点图形和终点图形 |
 | 切换流动效果 | 选中智能连线后点击工具箱中的“流动”按钮 |
 | 删除元素 | 选中元素后按 `Delete` 或 `Backspace` |

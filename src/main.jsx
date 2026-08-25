@@ -7,7 +7,7 @@ const STORAGE_KEY = 'linggan-whiteboard-workspace-v2';
 const UI_STORAGE_KEY = 'linggan-whiteboard-ui-v1';
 const DOCK_STORAGE_KEY = 'linggan-whiteboard-dock-pinned-v1';
 const TOOL_CYCLE_STORAGE_KEY = 'linggan-whiteboard-tool-cycle-v1';
-const APP_VERSION = '1.7.1';
+const APP_VERSION = '1.7.2';
 const BOARD_WIDTH = 1600;
 const BOARD_HEIGHT = 1000;
 const COLORS = ['#17191d', '#ff6663', '#ffb21a', '#41a05d', '#175cd3', '#9b6de8'];
@@ -22,10 +22,14 @@ const Icon = ({ name, size = 22 }) => {
     highlight: <><path d="m5 15 8.8-11 5.2 4-8.8 11H5Z"/><path d="m4 21 6-2"/></>,
     eraser: <><path d="m4.2 14.2 8.8-8.8a2.1 2.1 0 0 1 3 0l3.2 3.2a2.1 2.1 0 0 1 0 3L12.4 18H8Z"/><path d="m10.5 8 6.2 6.2"/><path d="M12.4 18H21"/></>,
     line: <path d="M5 19 19 5"/>, arrow: <><path d="M4 18 19 5"/><path d="m12 5 7 0 0 7"/></>, connector: <><path d="M3 7h7v10h8"/><path d="m15 13 4 4-4 4"/></>, rect: <rect x="4" y="4" width="16" height="16" rx="1"/>, circle: <circle cx="12" cy="12" r="8"/>,
+    diamond: <path d="m12 3 9 9-9 9-9-9Z"/>,
+    person: <><circle cx="12" cy="5" r="2.5"/><path d="M12 7.5v7M7.5 11l4.5-3 4.5 3M8.5 21l3.5-6.5 3.5 6.5"/></>,
+    computer: <><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></>,
     text: <><path d="M5 5h14"/><path d="M12 5v14"/><path d="M8 19h8"/></>,
     sticky: <><path d="M5 4h14v11l-5 5H5Z"/><path d="M14 20v-5h5"/></>,
     sticker: <><circle cx="12" cy="12" r="9"/><path d="M8.5 10h.01M15.5 10h.01"/><path d="M8.5 14c1.4 2 5.6 2 7 0"/></>,
     undo: <><path d="m9 7-5 5 5 5"/><path d="M5 12h8a6 6 0 0 1 6 6"/></>, redo: <><path d="m15 7 5 5-5 5"/><path d="M19 12h-8a6 6 0 0 0-6 6"/></>,
+    copy: <><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></>,
     download: <><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></>,
     trash: <><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="m7 7 1 13h8l1-13"/></>,
     plus: <><path d="M12 5v14M5 12h14"/></>, minus: <path d="M5 12h14"/>,
@@ -45,8 +49,11 @@ const Icon = ({ name, size = 22 }) => {
   return <svg {...common}>{paths[name]}</svg>;
 };
 
-const TOOLS = [['select','选择'],['pen','画笔'],['highlight','荧光笔'],['eraser','橡皮擦'],['line','直线'],['arrow','箭头'],['connector','智能连线'],['rect','矩形'],['circle','圆形'],['text','文本'],['sticky','便签'],['sticker','贴纸']];
-const CONNECTABLE_TYPES = new Set(['rect','ellipse','sticky']);
+const WHITEBOARD_TOOLS = [['select','选择'],['pen','画笔'],['highlight','荧光笔'],['eraser','橡皮擦'],['line','直线'],['arrow','箭头'],['text','文本'],['sticky','便签'],['sticker','贴纸']];
+const FLOW_TOOLS = [['rect','矩形'],['circle','圆形'],['diamond','菱形'],['person','小人'],['computer','电脑'],['connector','智能连线']];
+const TOOLS = [...WHITEBOARD_TOOLS,...FLOW_TOOLS];
+const FLOW_TOOL_IDS = new Set(FLOW_TOOLS.map(([id])=>id));
+const CONNECTABLE_TYPES = new Set(['rect','ellipse','diamond','person','computer','sticky']);
 const WYSIWYG_TEXT_STYLE = {width:'100%',height:'100%',overflow:'hidden',whiteSpace:'pre-wrap',overflowWrap:'anywhere',wordBreak:'break-word',fontFamily:'Inter,"Microsoft YaHei","PingFang SC",sans-serif',fontWeight:500,letterSpacing:0};
 
 const seedElements = [
@@ -114,6 +121,13 @@ const arrowHead = (points,size=12) => {
 };
 const pointNearPolyline = (point,points,tolerance=10) => points.slice(1).some((end,index)=>{const start=points[index],dx=end[0]-start[0],dy=end[1]-start[1],lengthSq=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((point.x-start[0])*dx+(point.y-start[1])*dy)/lengthSq)),x=start[0]+t*dx,y=start[1]+t*dy;return Math.hypot(point.x-x,point.y-y)<=tolerance;});
 const removeElementAndConnections = (items,id) => items.filter(el=>el.id!==id&&!(el.type==='connector'&&(el.fromId===id||el.toId===id)));
+const duplicateElement = (source,offset=28) => {
+  const copy=clone(source);copy.id=crypto.randomUUID();
+  if(copy.type==='path')copy.points=copy.points.map(([x,y])=>[x+offset,y+offset]);
+  else if(copy.type==='line'){copy.x+=offset;copy.y+=offset;copy.x2+=offset;copy.y2+=offset;}
+  else{copy.x=(copy.x||0)+offset;copy.y=(copy.y||0)+offset;}
+  return copy;
+};
 const splitPathOutsideCircle = (path,center,radius) => {
   if(path.points.length===1)return Math.hypot(path.points[0][0]-center.x,path.points[0][1]-center.y)>radius+(path.width||2)/2?[path]:[];
   const sampled=[];
@@ -126,7 +140,7 @@ const splitPathOutsideCircle = (path,center,radius) => {
 };
 const wrapNote = text => text.split('\n').flatMap(line => line.length>9 ? (line.match(/.{1,9}/g)||[]) : [line]).slice(0,4);
 const shapeTextLayout = (el,text=el.text||'') => {
-  const ellipse=el.type==='ellipse',insetX=ellipse?el.w*.17:12,insetY=ellipse?el.h*.16:10,w=Math.max(18,el.w-insetX*2),h=Math.max(18,el.h-insetY*2),maximum=Math.min(26,Math.max(16,Math.min(el.w*.18,el.h*.34)));
+  const ellipse=el.type==='ellipse',diamond=el.type==='diamond',person=el.type==='person',computer=el.type==='computer',insetX=ellipse?el.w*.17:diamond?el.w*.24:computer?el.w*.12:12,insetY=ellipse?el.h*.16:diamond?el.h*.24:computer?el.h*.12:person?el.h*.62:10,w=Math.max(18,el.w-insetX*2),h=Math.max(18,person?el.h*.34:computer?el.h*.58:el.h-insetY*2),maximum=Math.min(26,Math.max(14,Math.min(el.w*.18,h*.34)));
   let size=maximum;
   for(;size>14;size-=1){const charsPerLine=Math.max(1,Math.floor(w/(size*1.02))),lineCount=text.split('\n').reduce((count,line)=>count+Math.max(1,Math.ceil(line.length/charsPerLine)),0);if(lineCount*size*1.3<=h)break;}
   return{x:el.x+insetX,y:el.y+insetY,w,h,size:Math.max(14,size),lineHeight:1.3};
@@ -158,6 +172,9 @@ function CanvasElement({el,selected=false,thumbnail=false,elementMap}){
   }
   else if(el.type==='rect')core=<g><rect x={el.x} y={el.y} width={el.w} height={el.h} fill="none" stroke={el.color} strokeWidth={el.width} rx="2"/><ShapeLabel el={el}/></g>;
   else if(el.type==='ellipse')core=<g><ellipse cx={el.x+el.w/2} cy={el.y+el.h/2} rx={el.w/2} ry={el.h/2} fill="none" stroke={el.color} strokeWidth={el.width}/><ShapeLabel el={el}/></g>;
+  else if(el.type==='diamond')core=<g><polygon points={`${el.x+el.w/2},${el.y} ${el.x+el.w},${el.y+el.h/2} ${el.x+el.w/2},${el.y+el.h} ${el.x},${el.y+el.h/2}`} fill="none" stroke={el.color} strokeWidth={el.width} strokeLinejoin="round"/><ShapeLabel el={el}/></g>;
+  else if(el.type==='person')core=<g fill="none" stroke={el.color} strokeWidth={el.width} strokeLinecap="round" strokeLinejoin="round"><circle cx={el.x+el.w/2} cy={el.y+el.h*.18} r={Math.min(el.w,el.h)*.11}/><path d={`M${el.x+el.w/2} ${el.y+el.h*.3}v${el.h*.28}M${el.x+el.w*.2} ${el.y+el.h*.43}l${el.w*.3}-${el.h*.13} ${el.w*.3} ${el.h*.13}M${el.x+el.w*.25} ${el.y+el.h*.78}l${el.w*.25}-${el.h*.2} ${el.w*.25} ${el.h*.2}`}/><ShapeLabel el={el}/></g>;
+  else if(el.type==='computer')core=<g fill="none" stroke={el.color} strokeWidth={el.width} strokeLinejoin="round"><rect x={el.x} y={el.y} width={el.w} height={el.h*.76} rx="3"/><path d={`M${el.x+el.w/2} ${el.y+el.h*.76}v${el.h*.16}M${el.x+el.w*.28} ${el.y+el.h*.94}h${el.w*.44}`}/><ShapeLabel el={el}/></g>;
   else if(el.type==='text'&&el.layout==='box')core=<foreignObject className="free-text-label" x={el.x} y={el.y} width={el.w} height={el.h}><div xmlns="http://www.w3.org/1999/xhtml" className="wysiwyg-text free-label-content" style={{...WYSIWYG_TEXT_STYLE,display:'flex',alignItems:'center',textAlign:'left',color:el.color,fontSize:el.size,lineHeight:1.3,fontFamily:font}}>{el.text}</div></foreignObject>;
   else if(el.type==='text')core=<text x={el.x} y={el.y} fill={el.color} fontSize={el.size} fontFamily={font}>{el.text.split('\n').map((line,i)=><tspan key={i} x={el.x} dy={i?el.size*1.25:0}>{line}</tspan>)}</text>;
   else if(el.type==='sticky')core=<g transform={`rotate(${el.rotate||0} ${el.x+el.w/2} ${el.y+el.h/2})`}><path d={`M${el.x} ${el.y}h${el.w}v${el.h-18}l-18 18h-${el.w-18}Z`} fill={el.color} filter={thumbnail?undefined:`url(#shadow-${el.id})`}/>{wrapNote(el.text).map((t,i)=><text key={i} x={el.x+20} y={el.y+36+i*27} fontSize="19" fontFamily="'KaiTi','STKaiti',cursive" fill="#272b32">{t}</text>)}</g>;
@@ -210,7 +227,7 @@ function Whiteboard(){
   const [toolCycle,setToolCycle]=useState(loadToolCycle); const [settingsDraft,setSettingsDraft]=useState(null);
   const [toast,setToast]=useState('');
   const [sidebarOpen,setSidebarOpen]=useState(loadSidebarPreference); const [search,setSearch]=useState(''); const [dialog,setDialog]=useState(null); const [inlineEditor,setInlineEditor]=useState(null); const [saveState,setSaveState]=useState('saved');
-  const svgRef=useRef(null),viewportRef=useRef(null),gesture=useRef(null),keyboardState=useRef(null),saveTimer=useRef(null),dockTimer=useRef(null),dockHovered=useRef(false),lastWheelSwitch=useRef(0),inlineValueRef=useRef(''),committedEditorSessions=useRef(new Set());
+  const svgRef=useRef(null),viewportRef=useRef(null),gesture=useRef(null),keyboardState=useRef(null),saveTimer=useRef(null),dockTimer=useRef(null),dockHovered=useRef(false),lastWheelSwitch=useRef(0),inlineValueRef=useRef(''),committedEditorSessions=useRef(new Set()),copyBuffer=useRef(null),pasteCount=useRef(0);
   const activeBoard=boards.find(b=>b.id===activeBoardId)||boards[0];
   const elementMap=useMemo(()=>new Map(elements.map(el=>[el.id,el])),[elements]);
   const orderedElements=useMemo(()=>[...elements.filter(el=>el.type==='connector'),...elements.filter(el=>el.type!=='connector')],[elements]);
@@ -225,6 +242,9 @@ function Whiteboard(){
   const commit=next=>{const sliced=history.slice(0,historyIndex+1);persistElements(next);setHistory([...sliced,clone(next)]);setHistoryIndex(sliced.length);};
   const undo=()=>{if(historyIndex>0){const i=historyIndex-1;setHistoryIndex(i);persistElements(clone(history[i]));setSelectedId(null);setConnectorStartId(null);}};
   const redo=()=>{if(historyIndex<history.length-1){const i=historyIndex+1;setHistoryIndex(i);persistElements(clone(history[i]));setSelectedId(null);setConnectorStartId(null);}};
+  const copySelection=()=>{const source=selectedId?elementMap.get(selectedId):null;if(!source){flash('请先选择要复制的元素');return false;}if(source.type==='connector'){flash('智能连线请重新连接');return false;}copyBuffer.current=clone(source);pasteCount.current=0;flash('已复制，按 Ctrl + V 粘贴');return true;};
+  const pasteSelection=()=>{const source=copyBuffer.current;if(!source){flash('暂无可粘贴的元素');return;}pasteCount.current+=1;const copied=duplicateElement(source,28*pasteCount.current);commit([...elements,copied]);setSelectedId(copied.id);setConnectorStartId(null);flash('已粘贴副本');};
+  const duplicateSelected=()=>{const source=selectedId?elementMap.get(selectedId):null;if(!source){flash('请先选择要复制的元素');return;}if(source.type==='connector'){flash('智能连线请重新连接');return;}copyBuffer.current=clone(source);pasteCount.current=1;const copied=duplicateElement(source,28);commit([...elements,copied]);setSelectedId(copied.id);setConnectorStartId(null);flash('已复制选中元素');};
 
   useEffect(()=>{window.clearTimeout(saveTimer.current);saveTimer.current=window.setTimeout(()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify({boards,activeBoardId}));setSaveState('saved');}catch{setSaveState('error');}},220);return()=>window.clearTimeout(saveTimer.current);},[boards,activeBoardId]);
   useEffect(()=>{try{localStorage.setItem(UI_STORAGE_KEY,sidebarOpen?'open':'closed');}catch{ /* keep the current session state */ }},[sidebarOpen]);
@@ -242,7 +262,7 @@ function Whiteboard(){
   const findHit=(point,items)=>{const itemMap=items===elements?elementMap:new Map(items.map(el=>[el.id,el])),ordered=[...items.filter(el=>el.type==='connector'),...items.filter(el=>el.type!=='connector')];return[...ordered].reverse().find(el=>{if(el.type==='connector')return pointNearPolyline(point,connectorRoute(el,itemMap),12/zoom);if(el.type==='path')return pointNearPolyline(point,el.points,Math.max(9,(el.width||2)/2+4)/zoom);if(el.type==='line')return pointNearPolyline(point,[[el.x,el.y],[el.x2,el.y2]],Math.max(9,(el.width||2)/2+4)/zoom);const b=bounds(el);return point.x>=b.x-8&&point.x<=b.x+b.w+8&&point.y>=b.y-8&&point.y<=b.y+b.h+8;});};
   const hitTest=point=>findHit(point,elements);
   const hitConnectable=point=>[...elements].reverse().find(el=>{if(!CONNECTABLE_TYPES.has(el.type))return false;const b=bounds(el);return point.x>=b.x&&point.x<=b.x+b.w&&point.y>=b.y&&point.y<=b.y+b.h;});
-  const hitEditableShape=point=>[...elements].reverse().find(el=>{if(el.type!=='rect'&&el.type!=='ellipse')return false;const b=bounds(el);return point.x>=b.x&&point.x<=b.x+b.w&&point.y>=b.y&&point.y<=b.y+b.h;});
+  const hitEditableShape=point=>[...elements].reverse().find(el=>{if(!CONNECTABLE_TYPES.has(el.type)||el.type==='sticky')return false;const b=bounds(el);return point.x>=b.x&&point.x<=b.x+b.w&&point.y>=b.y&&point.y<=b.y+b.h;});
   const openElementDialog=(type,p,edit=null)=>setDialog({type,x:p.x,y:p.y,editId:edit?.id,value:edit?.text||'',color:edit?.color||NOTE_COLORS[0]});
   const startInlineEditor=p=>{
     const shape=hitEditableShape(p),hit=hitTest(p);
@@ -261,19 +281,19 @@ function Whiteboard(){
     if(tool==='select'){setSelectedId(hit?.id||null);if(hit&&hit.type!=='connector')gesture.current={kind:'move',start:p,original:hit,base:elements};return;}
     if(tool==='connector'){
       const shape=hitConnectable(p);
-      if(!shape){setConnectorStartId(null);setSelectedId(null);flash('请点击矩形、圆形或便签进行连接');return;}
+      if(!shape){setConnectorStartId(null);setSelectedId(null);flash('请点击流程图图形或便签进行连接');return;}
       if(!connectorStartId){setConnectorStartId(shape.id);setSelectedId(shape.id);flash('已选择起点，请点击目标图形');return;}
       if(connectorStartId===shape.id){flash('请选择另一个图形作为终点');return;}
-      const id=crypto.randomUUID(),next=[...elements,{id,type:'connector',fromId:connectorStartId,toId:shape.id,color,width:strokeWidth,animated:flowEnabled}];
+      const id=crypto.randomUUID(),next=[...elements,{id,type:'connector',fromId:connectorStartId,toId:shape.id,color:'#17191d',width:strokeWidth,animated:flowEnabled}];
       commit(next);setConnectorStartId(null);setSelectedId(id);flash('智能连线已创建');return;
     }
     if(tool==='eraser'){const erasing={kind:'erase',base:elements,changed:false,latest:elements};gesture.current=erasing;setEraserPoint(p);setElements(current=>eraseAt(p,current,erasing));setSelectedId(null);setConnectorStartId(null);return;}
     if(tool==='text'){startInlineEditor(p);return;} if(tool==='sticky'){openElementDialog('sticky',p);return;}
     if(tool==='sticker'){commit([...elements,{id:crypto.randomUUID(),type:'sticker',x:p.x-42,y:p.y-42,w:84,h:84,text:pendingSticker}]);return;}
-    const id=crypto.randomUUID(),base={id,color,width:tool==='highlight'?18:strokeWidth};let el;
+    const id=crypto.randomUUID(),base={id,color:FLOW_TOOL_IDS.has(tool)?'#17191d':color,width:tool==='highlight'?18:strokeWidth};let el;
     if(tool==='pen'||tool==='highlight')el={...base,type:'path',opacity:tool==='highlight'?.35:1,points:[[p.x,p.y]]};
     else if(tool==='line'||tool==='arrow')el={...base,type:'line',x:p.x,y:p.y,x2:p.x,y2:p.y,arrow:tool==='arrow'};
-    else if(tool==='rect'||tool==='circle')el={...base,type:tool==='circle'?'ellipse':'rect',x:p.x,y:p.y,w:0,h:0};
+    else if(['rect','circle','diamond','person','computer'].includes(tool))el={...base,type:tool==='circle'?'ellipse':tool,x:p.x,y:p.y,w:0,h:0,textColor:'#17191d'};
     if(el){setElements([...elements,el]);gesture.current={kind:'draw',id,start:p,base:elements};}
   };
   const onPointerMove=event=>{const p=point(event);if(tool==='eraser')setEraserPoint(p);const g=gesture.current;if(!g){if(tool==='select')setHoveringElement(Boolean(hitTest(p)));return;}if(g.kind==='pan'){setCamera({x:g.startCamera.x-(event.clientX-g.startClient.x)/zoom,y:g.startCamera.y-(event.clientY-g.startClient.y)/zoom});return;}if(g.kind==='erase'){setElements(current=>eraseAt(p,current,g));return;}if(g.kind==='move'){const dx=p.x-g.start.x,dy=p.y-g.start.y;setElements(g.base.map(el=>el.id!==g.original.id?el:el.type==='path'?{...el,points:el.points.map(q=>[q[0]+dx,q[1]+dy])}:el.type==='line'?{...el,x:el.x+dx,y:el.y+dy,x2:el.x2+dx,y2:el.y2+dy}:{...el,x:el.x+dx,y:el.y+dy}));return;}setElements(current=>current.map(el=>el.id!==g.id?el:el.type==='path'?{...el,points:[...el.points,[p.x,p.y]]}:el.type==='line'?{...el,x2:p.x,y2:p.y}:{...el,x:Math.min(g.start.x,p.x),y:Math.min(g.start.y,p.y),w:Math.abs(p.x-g.start.x),h:Math.abs(p.y-g.start.y)}));};
@@ -287,10 +307,12 @@ function Whiteboard(){
     setDialog(null);
   };
 
-  keyboardState.current={undo,redo,selectedId,elements,commit};
-  useEffect(()=>{const keyDown=e=>{const s=keyboardState.current,typing=/INPUT|TEXTAREA/.test(e.target.tagName);if(e.code==='Space'&&!dialog&&!typing){e.preventDefault();setSpacePressed(true);}if(!typing&&(e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?s.redo():s.undo();}if(!typing&&(e.key==='Delete'||e.key==='Backspace')&&s.selectedId&&!dialog){e.preventDefault();s.commit(removeElementAndConnections(s.elements,s.selectedId));setSelectedId(null);setConnectorStartId(null);}if(e.key==='Escape'&&!typing){if(dialog)setDialog(null);setSelectedId(null);setConnectorStartId(null);setStickerOpen(false);setSpacePressed(false);}};const keyUp=e=>{if(e.code==='Space')setSpacePressed(false);};window.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);return()=>{window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);};},[dialog]);
+  keyboardState.current={undo,redo,selectedId,elements,commit,copySelection,pasteSelection,duplicateSelected};
+  useEffect(()=>{const keyDown=e=>{const s=keyboardState.current,typing=/INPUT|TEXTAREA/.test(e.target.tagName)||e.target.isContentEditable,ctrl=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();if(e.code==='Space'&&!dialog&&!typing){e.preventDefault();setSpacePressed(true);}if(!typing&&ctrl&&key==='z'){e.preventDefault();e.shiftKey?s.redo():s.undo();}if(!typing&&ctrl&&key==='c'&&s.selectedId){e.preventDefault();s.copySelection();}if(!typing&&ctrl&&key==='v'){e.preventDefault();s.pasteSelection();}if(!typing&&ctrl&&key==='d'&&s.selectedId){e.preventDefault();s.duplicateSelected();}if(!typing&&(e.key==='Delete'||e.key==='Backspace')&&s.selectedId&&!dialog){e.preventDefault();s.commit(removeElementAndConnections(s.elements,s.selectedId));setSelectedId(null);setConnectorStartId(null);}if(e.key==='Escape'&&!typing){if(dialog)setDialog(null);setSelectedId(null);setConnectorStartId(null);setStickerOpen(false);setSpacePressed(false);}};const keyUp=e=>{if(e.code==='Space')setSpacePressed(false);};window.addEventListener('keydown',keyDown);window.addEventListener('keyup',keyUp);return()=>{window.removeEventListener('keydown',keyDown);window.removeEventListener('keyup',keyUp);};},[dialog]);
 
   const toggleFlow=()=>{if(selectedConnector?.type==='connector'){commit(elements.map(el=>el.id===selectedId?{...el,animated:el.animated===false}:el));}else setFlowEnabled(value=>!value);};
+  const chooseTool=id=>{setTool(id);if(FLOW_TOOL_IDS.has(id))setColor('#17191d');setEraserPoint(null);setConnectorStartId(null);setSelectedId(null);setStickerOpen(id==='sticker'?!stickerOpen:false);};
+  const renderToolButton=([id,label])=><button key={id} title={id==='connector'?'依次点击两个图形，自动规划路径':label} className={`tool-button ${tool===id?'active':''}`} onClick={()=>chooseTool(id)}><Icon name={id}/><span>{label}</span></button>;
   const onCanvasWheel=event=>{event.preventDefault();if(!event.deltaY)return;const now=Date.now();if(now-lastWheelSwitch.current<160)return;lastWheelSwitch.current=now;const ids=toolCycle.mode==='custom'?toolCycle.tools:TOOLS.map(item=>item[0]),currentIndex=ids.indexOf(tool),nextIndex=currentIndex<0?(event.deltaY>0?0:ids.length-1):(currentIndex+(event.deltaY>0?1:-1)+ids.length)%ids.length,nextTool=ids[nextIndex],label=TOOLS.find(item=>item[0]===nextTool)?.[1]||nextTool;setTool(nextTool);setSelectedId(null);setConnectorStartId(null);setStickerOpen(false);setEraserPoint(null);flash(`已切换：${label}`);};
   const toggleCycleTool=id=>setSettingsDraft(current=>{if(!current)return current;const selected=current.tools.includes(id);if(selected&&current.tools.length<=3){flash('自定义轮询至少选择 3 个工具');return current;}if(!selected&&current.tools.length>=5){flash('自定义轮询最多选择 5 个工具');return current;}const chosen=new Set(selected?current.tools.filter(toolId=>toolId!==id):[...current.tools,id]);return{...current,tools:TOOLS.map(item=>item[0]).filter(toolId=>chosen.has(toolId))};});
 
@@ -303,7 +325,7 @@ function Whiteboard(){
     {!sidebarOpen?<button className="sidebar-reopen" onClick={()=>setSidebarOpen(true)} aria-label="展开画板库" title="展开画板库"><Icon name="panelOpen" size={21}/><span>画板库</span></button>:null}
     <section className={`workspace ${sidebarOpen?'with-sidebar':''}`}>
       {!dockVisible?<button className="tool-dock-trigger" aria-label="显示工具箱" title="鼠标移入显示工具箱" onMouseEnter={enterDock} onFocus={enterDock} onClick={enterDock}><Icon name="pin" size={16}/><span>工具</span></button>:null}
-      <div className={`tool-dock ${dockVisible?'':'dock-hidden'}`} role="toolbar" aria-label="白板工具" onMouseEnter={enterDock} onMouseLeave={leaveDock} onPointerDown={armDockTimer}><div className="tool-row">{TOOLS.map(([id,label])=><button key={id} title={id==='connector'?'依次点击两个图形，自动规划路径':label} className={`tool-button ${tool===id?'active':''}`} onClick={()=>{setTool(id);setEraserPoint(null);setConnectorStartId(null);setSelectedId(null);setStickerOpen(id==='sticker'?!stickerOpen:false);}}><Icon name={id}/><span>{label}</span></button>)}</div><div className="option-row"><div className="colors">{COLORS.map(c=><button key={c} aria-label={`选择颜色 ${c}`} className={`swatch ${color===c?'selected':''}`} style={{background:c}} onClick={()=>setColor(c)}/>)}</div><span className="small-divider"/><button className="icon-only" aria-label={tool==='eraser'?'缩小橡皮':'减小笔画'} onClick={()=>tool==='eraser'?setEraserSize(Math.max(8,eraserSize-4)):setStrokeWidth(Math.max(2,strokeWidth-1))}><Icon name="minus" size={18}/></button>{tool==='eraser'?<span className="eraser-size-label">橡皮 {eraserSize}</span>:<span className="stroke-preview" style={{height:strokeWidth,background:color}}/>}<button className="icon-only" aria-label={tool==='eraser'?'放大橡皮':'增大笔画'} onClick={()=>tool==='eraser'?setEraserSize(Math.min(80,eraserSize+4)):setStrokeWidth(Math.min(12,strokeWidth+1))}><Icon name="plus" size={18}/></button><span className="small-divider"/><button className={`flow-toggle ${(selectedConnector?.type==='connector'?selectedConnector.animated!==false:flowEnabled)?'active':''}`} aria-pressed={selectedConnector?.type==='connector'?selectedConnector.animated!==false:flowEnabled} title={selectedConnector?.type==='connector'?'切换当前连线流动效果':'设置新连线的流动效果'} onClick={toggleFlow}><Icon name="flow" size={19}/><span>流动</span></button><span className="small-divider"/><button className="history-button" disabled={historyIndex===0} onClick={undo}><Icon name="undo" size={20}/><span>撤销</span></button><button className="history-button" disabled={historyIndex===history.length-1} onClick={redo}><Icon name="redo" size={20}/><span>重做</span></button><span className="small-divider"/><button className={`dock-pin ${dockPinned?'active':''}`} aria-label={dockPinned?'取消固定工具箱':'固定工具箱'} aria-pressed={dockPinned} title={dockPinned?'取消固定，5 秒后自动隐藏':'固定工具箱一直显示'} onClick={()=>setDockPinned(value=>!value)}><Icon name="pin" size={18}/><span>{dockPinned?'已固定':'固定'}</span></button></div>{stickerOpen?<div className="sticker-panel"><div className="panel-title"><span>选择贴纸</span><button onClick={()=>setStickerOpen(false)} aria-label="关闭"><Icon name="x" size={18}/></button></div><div className="sticker-grid">{STICKERS.map(s=><button key={s} className={pendingSticker===s?'chosen':''} onClick={()=>{setPendingSticker(s);setTool('sticker');}}>{s}</button>)}</div><p>选择后在白板任意位置点击</p></div>:null}</div>
+      <div className={`tool-dock ${dockVisible?'':'dock-hidden'}`} role="toolbar" aria-label="白板工具" onMouseEnter={enterDock} onMouseLeave={leaveDock} onPointerDown={armDockTimer}><div className="tool-sections"><section className="tool-section whiteboard-tools"><span className="tool-section-label">画板</span><div className="tool-row">{WHITEBOARD_TOOLS.map(renderToolButton)}</div></section><section className="tool-section flow-tools"><span className="tool-section-label">流程图</span><div className="tool-row">{FLOW_TOOLS.map(renderToolButton)}</div></section></div><div className="option-row">{FLOW_TOOL_IDS.has(tool)?<div className="flow-color-note"><span/>黑色图形 · 黑色文字</div>:<div className="colors">{COLORS.map(c=><button key={c} aria-label={`选择颜色 ${c}`} className={`swatch ${color===c?'selected':''}`} style={{background:c}} onClick={()=>setColor(c)}/>)}</div>}<span className="small-divider"/><button className="icon-only" aria-label={tool==='eraser'?'缩小橡皮':'减小笔画'} onClick={()=>tool==='eraser'?setEraserSize(Math.max(8,eraserSize-4)):setStrokeWidth(Math.max(2,strokeWidth-1))}><Icon name="minus" size={18}/></button>{tool==='eraser'?<span className="eraser-size-label">橡皮 {eraserSize}</span>:<span className="stroke-preview" style={{height:strokeWidth,background:color}}/>}<button className="icon-only" aria-label={tool==='eraser'?'放大橡皮':'增大笔画'} onClick={()=>tool==='eraser'?setEraserSize(Math.min(80,eraserSize+4)):setStrokeWidth(Math.min(12,strokeWidth+1))}><Icon name="plus" size={18}/></button><span className="small-divider"/><button className={`flow-toggle ${(selectedConnector?.type==='connector'?selectedConnector.animated!==false:flowEnabled)?'active':''}`} aria-pressed={selectedConnector?.type==='connector'?selectedConnector.animated!==false:flowEnabled} title={selectedConnector?.type==='connector'?'切换当前连线流动效果':'设置新连线的流动效果'} onClick={toggleFlow}><Icon name="flow" size={19}/><span>流动</span></button><span className="small-divider"/><button className="history-button copy-button" disabled={!selectedId||selectedConnector?.type==='connector'} onClick={duplicateSelected} title="复制选中元素（Ctrl + D）"><Icon name="copy" size={20}/><span>复制</span></button><button className="history-button" disabled={historyIndex===0} onClick={undo}><Icon name="undo" size={20}/><span>撤销</span></button><button className="history-button" disabled={historyIndex===history.length-1} onClick={redo}><Icon name="redo" size={20}/><span>重做</span></button><span className="small-divider"/><button className={`dock-pin ${dockPinned?'active':''}`} aria-label={dockPinned?'取消固定工具箱':'固定工具箱'} aria-pressed={dockPinned} title={dockPinned?'取消固定，5 秒后自动隐藏':'固定工具箱一直显示'} onClick={()=>setDockPinned(value=>!value)}><Icon name="pin" size={18}/><span>{dockPinned?'已固定':'固定'}</span></button></div>{stickerOpen?<div className="sticker-panel"><div className="panel-title"><span>选择贴纸</span><button onClick={()=>setStickerOpen(false)} aria-label="关闭"><Icon name="x" size={18}/></button></div><div className="sticker-grid">{STICKERS.map(s=><button key={s} className={pendingSticker===s?'chosen':''} onClick={()=>{setPendingSticker(s);setTool('sticker');}}>{s}</button>)}</div><p>选择后在白板任意位置点击</p></div>:null}</div>
       <div className="canvas-viewport" ref={viewportRef}><svg ref={svgRef} className={`board infinite-board tool-${tool} ${isPanning?'panning':''} ${spacePressed?'pan-ready':''} ${hoveringElement?'hover-element':''}`} viewBox={`${camera.x} ${camera.y} ${viewWidth} ${viewHeight}`} onWheel={onCanvasWheel} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerLeave={()=>{setHoveringElement(false);setEraserPoint(null);}} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onDoubleClick={onDoubleClick}><defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#dfe4ea"/></pattern></defs><rect x={camera.x} y={camera.y} width={viewWidth} height={viewHeight} fill="#fff"/><rect x={camera.x} y={camera.y} width={viewWidth} height={viewHeight} fill="url(#dots)"/>{orderedElements.map(el=><CanvasElement key={el.id} el={el} elementMap={elementMap} selected={selectedId===el.id||connectorStartId===el.id}/>)}{tool==='eraser'&&eraserPoint?<circle className="eraser-preview" cx={eraserPoint.x} cy={eraserPoint.y} r={eraserSize/2} vectorEffect="non-scaling-stroke"/>:null}</svg></div>
       {inlineEditor?<InlineTextEditor key={inlineEditor.sessionId} editor={inlineEditor} style={inlineEditorStyle} zoom={zoom} valueRef={inlineValueRef} onCommit={commitInlineText} onCancel={editor=>setInlineEditor(current=>current?.sessionId===editor.sessionId?null:current)}/>:null}
       <div className="page-control"><strong>无限画布</strong><span/><small>空白处拖动</small></div><div className="zoom-control"><button aria-label="缩小" onClick={()=>setZoom(Math.max(.4,+(zoom-.1).toFixed(1)))}><Icon name="minus" size={19}/></button><strong>{Math.round(zoom*100)}%</strong><button aria-label="放大" onClick={()=>setZoom(Math.min(2.5,+(zoom+.1).toFixed(1)))}><Icon name="plus" size={19}/></button><span/><button aria-label="回到原点" title="回到原点" onClick={()=>{setZoom(1);setCamera({x:0,y:0});}}><Icon name="fit" size={20}/></button></div>
