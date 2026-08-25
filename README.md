@@ -6,9 +6,9 @@
 
 自由书写、绘制图形、添加便签，并让每一块画板都被自动记住。
 
-[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.0/Linggan-Whiteboard-1.8.0-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.0/Linggan-Whiteboard-1.8.0-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
+[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.1/Linggan-Whiteboard-1.8.1-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.1/Linggan-Whiteboard-1.8.1-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
 
-![Version](https://img.shields.io/badge/version-1.8.0-6C5CE7?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.8.1-6C5CE7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![License](https://img.shields.io/badge/license-MIT-22A06B?style=flat-square)
 ![Offline](https://img.shields.io/badge/data-local--only-F59E0B?style=flat-square)
@@ -32,9 +32,10 @@
 | 📌 智能工具箱 | 图钉固定后始终显示；未固定时点击画布立即隐藏，悬停立即唤回 |
 | 🖱️ 分类滚轮切换 | 画板模式只轮询画板工具，流程图模式只轮询流程工具；两组均可独立配置 3–5 个常用工具 |
 | ✍️ 自由书写 | 画笔、荧光笔、粗细和多种颜色，适合鼠标与触控书写 |
-| 🧰 模式工具箱 | “画板”与“流程图”一键切换，界面一次只显示当前类别，不再混在一起 |
+| 🧰 紧凑模式工具箱 | “画板 / 流程图”切换与当前工具排列在同一行，界面更低、更少遮挡画布 |
 | 📐 常用流程图形 | 矩形、开始/结束、菱形、圆形、输入/输出、文档、数据库、小人和电脑，默认黑图黑字 |
-| 🔗 四边自由连线 | 每个流程节点提供上、右、下、左四个连接点，像画线一样拖动连接并自动规划正交路径 |
+| 🔗 直接四边连线 | 选中流程节点后直接从上、右、下、左连接点拖到另一节点，无需切换连线工具 |
+| ✍️ 流程图原位文字 | 双击任意流程图形直接输入，另有独立“文字”工具用于画布文字 |
 | 📝 所见即所得文本 | 在画布或图形内直接输入；编辑与完成状态使用相同字体、字号、行高、留白与换行 |
 | 🎨 贴纸 | 在画布中加入表情贴纸，让重点更加醒目 |
 | 📋 选择复制 | 选中元素后使用工具箱“复制”，或通过 `Ctrl + C` / `Ctrl + V`、`Ctrl + D` 快速创建错位副本 |
@@ -48,11 +49,11 @@
 
 ### Windows 安装版
 
-从 [GitHub Releases 下载灵感白板-1.8.0 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.0/Linggan-Whiteboard-1.8.0-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
+从 [GitHub Releases 下载灵感白板-1.8.1 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.1/Linggan-Whiteboard-1.8.1-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
 
 ### Windows 便携版
 
-从 [GitHub Releases 下载灵感白板-1.8.0 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.0/Linggan-Whiteboard-1.8.0-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
+从 [GitHub Releases 下载灵感白板-1.8.1 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.1/Linggan-Whiteboard-1.8.1-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
 
 > 当前发行文件尚未购买代码签名证书。Windows 首次运行时可能显示 SmartScreen 提示，请核对文件来源后选择“更多信息 → 仍要运行”。
 
@@ -73,12 +74,13 @@
 | 拖动画布 | 选择工具下拖动空白处，或按住空格键/鼠标中键拖动 |
 | 输入画布文字 | 选择“文本”后点击空白处，直接输入，`Ctrl + Enter` 完成 |
 | 输入图形文字 | 选择“文本”后点击矩形或圆形，文字自动居中排版 |
-| 再次编辑 | 使用“选择”双击文字、矩形、圆形或便签 |
+| 再次编辑 | 画板模式使用“选择”双击；流程图模式可直接双击任意图形或文字 |
 | 调节橡皮 | 选择“橡皮擦”后用工具箱的减号、加号调节擦除范围 |
-| 切换工具模式 | 点击工具箱顶部“画板”或“流程图”，一次只显示当前类别 |
+| 切换工具模式 | 点击工具箱同一行的“画板”或“流程图”，一次只显示当前类别 |
 | 滚轮切换工具 | 鼠标位于画布时滚动，只在当前画板或流程图类别中切换 |
-| 创建流程图 | 切换到“流程图”，选择常用节点后拖动绘制，可直接输入黑色文字 |
-| 创建自由连线 | 选择“自由连线”，从节点任一边的圆形连接点按住拖到另一节点连接点 |
+| 创建流程图 | 切换到“流程图”，选择常用节点后拖动绘制；已有节点无需选择工具即可直接拖动 |
+| 输入流程文字 | 双击流程图形直接输入；选择独立“文字”工具后点击空白处可输入说明文字 |
+| 创建节点连线 | 单击选中节点，从任一边的圆形连接点按住拖到另一节点连接点，无需连线工具 |
 | 切换流动效果 | 选中智能连线后点击工具箱中的“流动”按钮 |
 | 删除元素 | 选中元素后按 `Delete` 或 `Backspace` |
 | 撤销 | `Ctrl + Z` |
@@ -107,13 +109,13 @@
 
 ## 画板与流程图模式
 
-工具箱顶部提供两个互斥模式。画板模式专注书写、荧光标注、文本、便签与贴纸；流程图模式集中显示流程节点和自由连线，一次只显示一组，减少课堂操作时的视觉干扰。
+工具箱把两个互斥模式与当前工具放在同一行。画板模式专注书写、荧光标注、文本、便签与贴纸；流程图模式集中显示流程节点与独立文字工具，一次只显示一组，减少课堂操作时的视觉干扰。
 
-流程节点的上、右、下、左均有连接点。选择“自由连线”后，从任意连接点按住并拖到另一节点的连接点即可完成连接；拖动过程中会显示路径预览。连线会保存两端具体连接边，之后移动节点时仍会从原边重新规划。
+流程图不再需要“选择”和“自由连线”工具：单击并拖动任意节点即可移动；单击节点后会显示上、右、下、左四个连接点，从连接点按住并拖到另一节点的连接点即可完成连接。拖动过程中会显示路径预览，连线会保存两端具体连接边，之后移动节点时仍会从原边重新规划。
 
 ## 原位文字与图形排版
 
-选择“文本”后，无论点击画布空白处还是矩形、圆形，都可以在当前位置直接输入，不再弹出文字窗口。输入过程与完成后的字体、字号、字重、行高、对齐和换行保持一致。图形内会预留舒适边距，并根据可用空间自动居中与缩放；点击任意其他区域即可确认，使用选择工具双击可再次编辑。
+选择“文本 / 文字”后，无论点击画布空白处还是图形，都可以在当前位置直接输入，不再弹出文字窗口。流程图形还支持在任意节点工具下直接双击编辑。输入过程与完成后的字体、字号、字重、行高、对齐和换行保持一致；点击画布其他区域只会确认当前文字，不会误画新图形。
 
 ![矩形内直接输入并自动排版](./docs/images/inline-shape-text.png)
 
