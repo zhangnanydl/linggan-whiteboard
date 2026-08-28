@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, nativeImage } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs/promises');
 
@@ -11,13 +11,15 @@ const safePngPath = (name) => {
   if (path.dirname(target) !== root || path.extname(target).toLowerCase() !== '.png') throw new Error('Invalid PNG path');
   return target;
 };
-const describeImage = async (filePath) => { const stat=await fs.stat(filePath);return{name:path.basename(filePath),path:filePath,size:stat.size,updatedAt:stat.mtimeMs}; };
+const imagePreview = (filePath, width = 240) => { const image=nativeImage.createFromPath(filePath);return image.isEmpty()?'':image.resize({width:Math.max(120,Math.min(1600,Number(width)||240))}).toDataURL(); };
+const describeImage = async (filePath) => { const stat=await fs.stat(filePath);return{name:path.basename(filePath),path:filePath,size:stat.size,updatedAt:stat.mtimeMs,previewUrl:imagePreview(filePath)}; };
 const listDownloadedImages = async () => { const root=downloadsRoot(),entries=await fs.readdir(root,{withFileTypes:true}),files=entries.filter(entry=>entry.isFile()&&path.extname(entry.name).toLowerCase()==='.png').map(entry=>path.join(root,entry.name)),images=await Promise.all(files.map(describeImage));return images.sort((a,b)=>b.updatedAt-a.updatedAt); };
 
 ipcMain.handle('downloads:list',listDownloadedImages);
 ipcMain.handle('downloads:open-folder',()=>shell.openPath(downloadsRoot()));
 ipcMain.handle('downloads:open-file',async(_event,name)=>shell.openPath(safePngPath(name)));
 ipcMain.handle('downloads:reveal-file',(_event,name)=>{shell.showItemInFolder(safePngPath(name));return true;});
+ipcMain.handle('downloads:preview',(_event,name,width)=>imagePreview(safePngPath(name),width));
 ipcMain.handle('downloads:save-png',async(_event,{name,data})=>{const requested=safePngPath(name),extension=path.extname(requested),base=requested.slice(0,-extension.length);let target=requested,index=1;while(true){try{await fs.access(target);target=`${base} (${index++})${extension}`;}catch{break;}}await fs.writeFile(target,Buffer.from(data));return describeImage(target);});
 
 const createWindow = () => {
