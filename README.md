@@ -6,9 +6,9 @@
 
 自由书写、绘制图形、添加便签，并让每一块画板都被自动记住。
 
-[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.1/Linggan-Whiteboard-1.8.1-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.1/Linggan-Whiteboard-1.8.1-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
+[下载安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.9.0/Linggan-Whiteboard-1.9.0-x64-setup.exe) · [下载便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.9.0/Linggan-Whiteboard-1.9.0-x64-portable.exe) · [全部版本](https://github.com/zhangnanydl/linggan-whiteboard/releases) · [报告问题](../../issues)
 
-![Version](https://img.shields.io/badge/version-1.8.1-6C5CE7?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.9.0-6C5CE7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=flat-square&logo=windows)
 ![License](https://img.shields.io/badge/license-MIT-22A06B?style=flat-square)
 ![Offline](https://img.shields.io/badge/data-local--only-F59E0B?style=flat-square)
@@ -30,12 +30,15 @@
 | 🗂️ 记忆画板 | 创建、搜索、切换、重命名和删除多个画板，每块画板独立保存 |
 | 🖥️ 无限画布 | 工作区铺满窗口，可向任意方向拖动漫游，画板库可收起并记住状态 |
 | 📌 智能工具箱 | 图钉固定后始终显示；未固定时点击画布立即隐藏，悬停立即唤回 |
-| 🖱️ 分类滚轮切换 | 画板模式只轮询画板工具，流程图模式只轮询流程工具；两组均可独立配置 3–5 个常用工具 |
+| 🖱️ 快捷滚轮切换 | 默认在最后选择的当前工具与“选择 / 拖动画布”之间往返；也可配置 2–5 个轮询项 |
 | ✍️ 自由书写 | 画笔、荧光笔、粗细和多种颜色，适合鼠标与触控书写 |
 | 🧰 紧凑模式工具箱 | “画板 / 流程图”切换与当前工具排列在同一行，界面更低、更少遮挡画布 |
 | 📐 常用流程图形 | 矩形、开始/结束、菱形、圆形、输入/输出、文档、数据库、小人和电脑，默认黑图黑字 |
 | 🔗 直接四边连线 | 选中流程节点后直接从上、右、下、左连接点拖到另一节点，无需切换连线工具 |
 | ✍️ 流程图原位文字 | 双击任意流程图形直接输入，另有独立“文字”工具用于画布文字 |
+| 👆 精细选择反馈 | 鼠标移入可操作内容时显示淡蓝轮廓和移动光标，空白单击不会留下零尺寸图形 |
+| 🖼️ 干净 PNG 导出 | 按当前视野高清导出，自动移除选框、锚点、悬停框等编辑辅助层 |
+| 📂 下载管理 | 桌面版直接保存到下载目录，可浏览记录、一键打开目录、打开图片或定位文件 |
 | 📝 所见即所得文本 | 在画布或图形内直接输入；编辑与完成状态使用相同字体、字号、行高、留白与换行 |
 | 🎨 贴纸 | 在画布中加入表情贴纸，让重点更加醒目 |
 | 📋 选择复制 | 选中元素后使用工具箱“复制”，或通过 `Ctrl + C` / `Ctrl + V`、`Ctrl + D` 快速创建错位副本 |
@@ -49,11 +52,11 @@
 
 ### Windows 安装版
 
-从 [GitHub Releases 下载灵感白板-1.8.1 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.1/Linggan-Whiteboard-1.8.1-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
+从 [GitHub Releases 下载灵感白板 1.9.0 安装版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.9.0/Linggan-Whiteboard-1.9.0-x64-setup.exe)，双击后可选择安装目录。安装程序会创建桌面和开始菜单快捷方式。
 
 ### Windows 便携版
 
-从 [GitHub Releases 下载灵感白板-1.8.1 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.8.1/Linggan-Whiteboard-1.8.1-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
+从 [GitHub Releases 下载灵感白板 1.9.0 便携版](https://github.com/zhangnanydl/linggan-whiteboard/releases/download/v1.9.0/Linggan-Whiteboard-1.9.0-x64-portable.exe)，无需安装即可运行，适合放入 U 盘或教学电脑。
 
 > 当前发行文件尚未购买代码签名证书。Windows 首次运行时可能显示 SmartScreen 提示，请核对文件来源后选择“更多信息 → 仍要运行”。
 
@@ -77,7 +80,8 @@
 | 再次编辑 | 画板模式使用“选择”双击；流程图模式可直接双击任意图形或文字 |
 | 调节橡皮 | 选择“橡皮擦”后用工具箱的减号、加号调节擦除范围 |
 | 切换工具模式 | 点击工具箱同一行的“画板”或“流程图”，一次只显示当前类别 |
-| 滚轮切换工具 | 鼠标位于画布时滚动，只在当前画板或流程图类别中切换 |
+| 滚轮切换工具 | 默认在最后选择的工具与“选择 / 拖动画布”之间往返；可在设置中改为 2–5 项轮询 |
+| 管理导出图片 | 点击顶部“下载管理”，可打开下载目录、浏览、打开或定位已导出的 PNG |
 | 创建流程图 | 切换到“流程图”，选择常用节点后拖动绘制；已有节点无需选择工具即可直接拖动 |
 | 输入流程文字 | 双击流程图形直接输入；选择独立“文字”工具后点击空白处可输入说明文字 |
 | 创建节点连线 | 单击选中节点，从任一边的圆形连接点按住拖到另一节点连接点，无需连线工具 |
@@ -121,7 +125,11 @@
 
 ## 滚轮工具轮询
 
-鼠标位于画布时滚动滚轮即可快速切换工具。画板模式只轮询画板工具，流程图模式只轮询流程工具，两组不会互相跳转。在“设置 → 工具切换设置”中可为当前模式独立选择 3–5 个常用工具，配置自动保存在本机。
+鼠标位于画布时滚动滚轮即可快速切换工具。默认勾选“当前工具”和“选择 / 拖动画布”：例如选择画笔后，滚一下切到选择工具拖动画布，再滚一下立即回到画笔。“当前工具”始终跟随最后一次主动选择的工具。也可以在“设置 → 工具切换设置”中改为自定义模式，为画板或流程图独立选择 2–5 个轮询项，配置自动保存在本机。
+
+## 下载管理
+
+桌面版导出 PNG 后会直接保存到 Windows 下载目录；如果文件重名，会自动追加序号而不覆盖旧图片。点击顶部“下载管理”即可刷新并浏览所有已导出的 PNG，一键打开下载目录，也可直接打开图片或在资源管理器中定位。浏览器开发预览仍使用浏览器下载机制，因此只显示本次运行的导出记录。
 
 ![自定义 3–5 个滚轮轮询工具](./docs/images/tool-cycle-settings.png)
 
