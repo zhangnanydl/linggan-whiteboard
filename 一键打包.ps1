@@ -54,7 +54,7 @@ try {
         throw 'Electron runtime is incomplete. Run the script again without -SkipInstall.'
     }
 
-    $PackageTempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "linggan-whiteboard-package-$PID"
+    $PackageTempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("linggan-whiteboard-package-" + [guid]::NewGuid().ToString('N'))
     $PrepackagedPath = Join-Path $PackageTempRoot 'prepackaged'
     $AppStagePath = Join-Path $PackageTempRoot 'app'
     New-Item -ItemType Directory -Force -Path $PrepackagedPath | Out-Null
@@ -68,12 +68,19 @@ try {
     npx asar pack $AppStagePath (Join-Path $PrepackagedPath 'resources\app.asar')
     if ($LASTEXITCODE -ne 0) { throw 'ASAR packaging failed.' }
 
-    $ProductName = (node -p "require('./package.json').build.productName").Trim()
-    Rename-Item -LiteralPath (Join-Path $PrepackagedPath 'electron.exe') -NewName "$ProductName.exe"
+    # Parse JSON as UTF-8 directly; native command output can corrupt Chinese names in Windows PowerShell.
+    $PackageConfig = Get-Content -LiteralPath (Join-Path $ProjectRoot 'package.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $ExecutableName = $PackageConfig.build.executableName
+    if ($ExecutableName -notmatch '^[A-Za-z0-9_-]+$') { throw 'build.executableName must be a stable ASCII filename.' }
+    Rename-Item -LiteralPath (Join-Path $PrepackagedPath 'electron.exe') -NewName "$ExecutableName.exe"
+    if (-not (Test-Path -LiteralPath (Join-Path $PrepackagedPath "$ExecutableName.exe"))) { throw 'Packaged executable is missing.' }
     npx electron-builder --prepackaged $PrepackagedPath --win nsis portable --x64
     if ($LASTEXITCODE -ne 0) { throw 'Electron packaging failed.' }
 
-    Remove-Item -LiteralPath $PackageTempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    $ResolvedPackageTemp = (Resolve-Path -LiteralPath $PackageTempRoot).Path
+    $ExpectedTempParent = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath()).TrimEnd('\')
+    if ((Split-Path -Parent $ResolvedPackageTemp) -ne $ExpectedTempParent -or (Split-Path -Leaf $ResolvedPackageTemp) -notlike 'linggan-whiteboard-package-*') { throw 'Unsafe temporary cleanup path.' }
+    Remove-Item -LiteralPath $ResolvedPackageTemp -Recurse -Force -ErrorAction SilentlyContinue
 
     $ReleasePath = Join-Path $ProjectRoot 'release'
     $PackageVersion = (node -p "require('./package.json').version").Trim()

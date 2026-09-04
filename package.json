@@ -1,6 +1,6 @@
 {
   "name": "linggan-whiteboard",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "适合课堂教学的桌面白板应用",
   "author": "张楠 (@zhangnanydl)",
   "license": "MIT",
@@ -44,6 +44,7 @@
   "build": {
     "appId": "com.linggan.whiteboard",
     "productName": "灵感白板",
+    "executableName": "Linggan-Whiteboard",
     "asar": true,
     "directories": {
       "output": "release"
@@ -61,7 +62,7 @@
       ]
     },
     "nsis": {
-      "artifactName": "灵感白板-${version}-${arch}-setup.${ext}",
+      "artifactName": "Linggan-Whiteboard-${version}-${arch}-setup.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
@@ -73,7 +74,7 @@
       "language": "2052"
     },
     "portable": {
-      "artifactName": "灵感白板-${version}-${arch}-portable.${ext}"
+      "artifactName": "Linggan-Whiteboard-${version}-${arch}-portable.${ext}"
     }
   }
 }
